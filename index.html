@@ -467,10 +467,10 @@ input[type=text], select{padding:8px 10px; border:1px solid var(--cizgi); border
 <div class="bildirim" id="bildirim" role="status" aria-live="polite"></div>
 <div class="altyazi" id="altyazi" hidden><span></span></div>
 <div class="imlec" id="imlec" hidden><span class="halka"></span></div>
-<div class="kapanis" id="kapanis" hidden aria-label="Föy Operasyon — süresi kaçan işi önceden gösterir. Kurulum 1 gün.">
+<div class="kapanis" id="kapanis" hidden aria-label="Föy Operasyon — süresi kaçan işi önceden gösterir. Örnek veriyle prototip.">
   <div class="logo-satir"><svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="14" fill="none" stroke="currentColor" stroke-width="3"/><path d="M17 9v8l5.5 3.6" fill="none" stroke="#e8a33d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Föy Operasyon</div>
   <p>Süresi kaçan işi önceden gösterir.</p>
-  <span class="kur">Kurulum 1 gün</span>
+  <span class="kur">Örnek veriyle prototip</span>
 </div>
 
 <script>
@@ -1066,7 +1066,7 @@ function cizAyarlar(){
     </section>
     <section class="kart onizleme" id="onizleme" aria-label="Canlı önizleme">${onizleme()}</section>
   </div>
-  <div class="kurulum" data-kurulum><b>1 gün</b><span>Bu ayarlarla kurulum: 1 gün · Trendyol anahtarı ve site dosyası yeterli.</span></div>`;
+  <div class="kurulum" data-kurulum><b>1 gün</b><span>Tahmini kurulum: 1 gün · Trendyol anahtarı ve site dosyası yeterli (doğrulanmadı).</span></div>`;
 }
 function onizleme(){
   const q = acikSorular()[0] || D.sorular[0];
@@ -1350,7 +1350,7 @@ async function turSorular(){
 }
 async function turSiparisler(){
   basla("lal");
-  yaz("Kargo gecikmesi, şikâyetlerin en sık sebebi."); await bekle(1200);
+  yaz("Kargo gecikmesi, incelenen şikâyetlerde en sık konu."); await bekle(1200);
   await tikla('.menu [data-sayfa="siparisler"]');
   await bekle(800);
   await tikla('[data-sip-sekme="gecikti"]');
@@ -1365,7 +1365,7 @@ async function turSiparisler(){
   await tikla('[data-eylem="gecikme"]');
   yaz("Mesaj hazır; gitmeden önce siz okursunuz."); await bekle(2600);
   await tikla('[data-eylem="gecikme-gonder"]');
-  yaz("Onaylandı. Müşteri merak edip yeniden sormaz."); await bekle(2400);
+  yaz("Onaylandı. Sonuç kayda geçti."); await bekle(2400);
   await tikla('[data-sip-sekme="yolda"]');
   const eksik = $$("tbody tr[data-siparis]").find(x => x.querySelector(".takip-eksik"));
   if(eksik){ vurgula(eksik); yaz("Takip numarası eksik olan sipariş de görünür."); await bekle(2400); }
@@ -1386,7 +1386,7 @@ async function turIadeler(){
   await tikla(`[data-iade="${hedef}"] [data-eylem="baglanti"]`);
   yaz("Müşteri durumunu bu sayfadan kendisi izler."); await bekle(3600);
   await tikla('.panel-alt [data-eylem="kapat"]');
-  yaz("Sormaya gerek kalmaz, destek yükü azalır."); await bekle(2400);
+  yaz("Müşteri durumunu sormadan görebilir."); await bekle(2400);
 }
 async function turKisisellestir(){
   basla("lal");
@@ -1403,7 +1403,7 @@ async function turKisisellestir(){
   vurgula("[data-oz-kpi]"); yaz("Soru hedefini kısaltın, kırmızılar ona göre hesaplanır."); await bekle(2800);
   await tikla("#ay-sinir-30");
   yaz("İade ödeme sınırı: 10, 14 ya da 30 gün."); await bekle(2600);
-  vurgula("[data-kurulum]"); yaz("Bu ayarlarla kurulum yalnızca bir gün sürer."); await bekle(2600);
+  vurgula("[data-kurulum]"); yaz("Ayarlar kurulumda işletmeyle birlikte doldurulur."); await bekle(2600);
 }
 async function kapanis(){
   altyazi.hidden = true; imlec.hidden = true;
