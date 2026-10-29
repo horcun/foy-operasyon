@@ -1,0 +1,1154 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Föy Operasyon</title>
+<meta name="description" content="Süresi kaçan soru, sipariş ve iadeyi önceden gösteren işletme paneli. Prototip, örnek veri.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1f2a26">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Föy Operasyon">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Düzen: masaüstünde solda demo şeridi + ortada telefon; dar ekranda çerçevesiz tam ekran uygulama; turda telefon ortada, altta altyazı */
+:root{
+  --masa:#E6E9EC; --yuzey:#F6F7F8; --kart:#FFFFFF; --cizgi:#D9DEE3; --yazi:#15181C; --soluk:#5A626C;
+  --kirmizi:#B42318; --kirmizi-zemin:#FDEBEA; --sari:#8A5A00; --sari-zemin:#FFF2CF; --sari-cizgi:#E2A400;
+  --yesil:#17663B; --yesil-zemin:#E2F3E8; --balon:#15181C; --balon-yazi:#FFFFFF; --cerceve:#1B1E22;
+  --marka-a:#9E2A4B; --marka-k:#F07A9B; --marka:var(--marka-a); --marka-on:#FFFFFF;
+  --marka-zemin:color-mix(in srgb, var(--marka) 11%, var(--kart));
+  --golge:0 1px 2px rgba(20,24,28,.06);
+  --f-baslik:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-govde:"Figtree", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+  --hiz:220ms;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --masa:#0A0C0E; --yuzey:#111417; --kart:#191D21; --cizgi:#2A3037; --yazi:#ECEFF2; --soluk:#9BA4AE;
+  --kirmizi:#FF7A70; --kirmizi-zemin:#3A1714; --sari:#F2BE55; --sari-zemin:#352A10; --sari-cizgi:#C99320;
+  --yesil:#62D193; --yesil-zemin:#11301F; --balon:#ECEFF2; --balon-yazi:#111417; --cerceve:#2B3036;
+  --marka:var(--marka-k); --marka-on:#111417; --golge:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --masa:#0A0C0E; --yuzey:#111417; --kart:#191D21; --cizgi:#2A3037; --yazi:#ECEFF2; --soluk:#9BA4AE;
+  --kirmizi:#FF7A70; --kirmizi-zemin:#3A1714; --sari:#F2BE55; --sari-zemin:#352A10; --sari-cizgi:#C99320;
+  --yesil:#62D193; --yesil-zemin:#11301F; --balon:#ECEFF2; --balon-yazi:#111417; --cerceve:#2B3036;
+  --marka:var(--marka-k); --marka-on:#111417; --golge:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}
+@media (prefers-reduced-motion: reduce){:root{--hiz:1ms}}
+
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--masa); color:var(--yazi); font-family:var(--f-govde); font-size:15px; line-height:1.4; -webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{outline:2px solid var(--marka); outline-offset:2px}
+.tn{font-variant-numeric:tabular-nums}
+
+/* ---------- sahne ---------- */
+.sahne{min-height:100%; display:flex; gap:40px; align-items:center; justify-content:center;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:24px}
+.demo{width:280px; flex:none; display:flex; flex-direction:column; gap:22px; align-self:center}
+.wordmark{font-family:var(--f-baslik); font-weight:800; font-size:36px; white-space:nowrap; letter-spacing:-.03em; line-height:1; display:flex; align-items:center; gap:10px}
+.wordmark svg{width:34px; height:34px}
+.demo p{margin:0; color:var(--soluk)}
+.demo h2{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--soluk); margin:0 0 8px; font-weight:700}
+.marka-sec{display:flex; flex-direction:column; gap:6px}
+.marka-btn{display:flex; align-items:center; gap:10px; padding:9px 10px; border:1px solid var(--cizgi); border-radius:10px; background:var(--kart); text-align:left}
+.marka-btn small{display:block; color:var(--soluk); font-size:12px}
+.marka-btn[aria-pressed="true"]{border-color:var(--yazi); box-shadow:inset 0 0 0 1px var(--yazi)}
+.nokta{width:14px; height:14px; border-radius:50%; flex:none}
+.tur-linkler{display:flex; flex-wrap:wrap; gap:6px}
+.tur-linkler a{font-size:13px; padding:6px 10px; border-radius:999px; border:1px solid var(--cizgi); color:var(--yazi); text-decoration:none; background:var(--kart)}
+.tur-linkler a:hover{border-color:var(--yazi)}
+.neden{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; font-size:13px; color:var(--soluk)}
+.neden b{color:var(--yazi); font-variant-numeric:tabular-nums}
+
+/* ---------- telefon ---------- */
+.telefon{width:414px; height:min(868px, calc(100vh - 48px)); min-height:600px; flex:none; background:var(--cerceve); border-radius:54px; padding:12px; position:relative; box-shadow:0 30px 60px -30px rgba(0,0,0,.45)}
+.ekran{position:relative; width:100%; height:100%; border-radius:43px; overflow:hidden; background:var(--yuzey); display:flex; flex-direction:column; transition:opacity var(--hiz)}
+.ekran.gecis{opacity:.15}
+.durum-cubugu{height:44px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:0 30px 0 34px; font-weight:600; font-size:14px}
+.durum-cubugu .pil{width:24px; height:11px; border:1.5px solid currentColor; border-radius:3px; position:relative}
+.durum-cubugu .pil::after{content:""; position:absolute; inset:1.5px 6px 1.5px 1.5px; background:currentColor; border-radius:1px}
+
+.app-ust{flex:none; display:flex; align-items:center; gap:10px; padding:6px max(16px, env(safe-area-inset-right,0px)) 10px max(16px, env(safe-area-inset-left,0px))}
+.logo{width:34px; height:34px; flex:none; display:grid; place-items:center; background:var(--marka); color:var(--marka-on); font-family:var(--f-baslik); font-weight:800; font-size:17px}
+.logo.daire{border-radius:50%} .logo.kare{border-radius:10px} .logo.yaprak{border-radius:50% 4px 50% 4px}
+.app-ust .ad{font-family:var(--f-baslik); font-weight:700; font-size:17px; line-height:1.1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.app-ust .alt{font-size:12px; color:var(--soluk)}
+.ornek{margin-left:auto; flex:none; font-size:11px; font-weight:600; letter-spacing:.04em; padding:3px 7px; border:1px dashed var(--soluk); border-radius:6px; color:var(--soluk)}
+
+.icerik{flex:1; overflow-y:auto; overflow-x:hidden; padding:4px max(16px, env(safe-area-inset-right,0px)) 24px max(16px, env(safe-area-inset-left,0px)); display:flex; flex-direction:column; gap:14px; scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){.icerik{scroll-behavior:auto}}
+
+.sekmeler{flex:none; display:grid; grid-template-columns:repeat(5,1fr); border-top:1px solid var(--cizgi); background:var(--kart); padding:6px 6px calc(10px + env(safe-area-inset-bottom,0px))}
+.sekme{background:none; border:0; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 0; font-size:11px; font-weight:600; color:var(--soluk); position:relative; border-radius:10px}
+.sekme svg{width:22px; height:22px}
+.sekme[aria-current="page"]{color:var(--marka)}
+.sekme .rozet-sayi{position:absolute; top:2px; left:calc(50% + 6px); min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--kirmizi); color:var(--kart); font-size:11px; line-height:18px; text-align:center; font-variant-numeric:tabular-nums}
+
+/* ---------- ortak bileşenler ---------- */
+.sayfa-bas{display:flex; flex-direction:column; gap:4px}
+.sayfa-bas h1{font-family:var(--f-baslik); font-weight:800; font-size:26px; letter-spacing:-.02em; margin:0; line-height:1.1; text-wrap:balance}
+.sayfa-bas p{margin:0; color:var(--soluk); font-size:13px}
+.ozet-cumle{font-family:var(--f-baslik); font-weight:700; font-size:24px; line-height:1.15; letter-spacing:-.015em; margin:0; text-wrap:balance}
+.ozet-cumle .k{color:var(--kirmizi)} .ozet-cumle .s{color:var(--sari)}
+.bilgi-not{font-size:13px; padding:10px 12px; border-radius:10px; background:var(--marka-zemin); display:flex; gap:8px; align-items:flex-start}
+.bilgi-not svg{flex:none; width:16px; height:16px; margin-top:2px; color:var(--marka)}
+.grup-bas{display:flex; align-items:baseline; justify-content:space-between; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--soluk); margin-top:4px}
+.liste{display:flex; flex-direction:column; gap:10px}
+
+.rozet{display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; padding:2px 8px 2px 6px; border-radius:999px; white-space:nowrap}
+.rozet svg{width:13px; height:13px}
+.r-kirmizi{background:var(--kirmizi-zemin); color:var(--kirmizi)}
+.r-sari{background:var(--sari-zemin); color:var(--sari)}
+.r-yesil{background:var(--yesil-zemin); color:var(--yesil)}
+.kanal{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:2px 7px; border-radius:5px; border:1px solid var(--cizgi); color:var(--soluk); white-space:nowrap}
+.kanal i{width:7px; height:7px; display:inline-block; background:var(--soluk)}
+.kanal.trendyol i{border-radius:1px} .kanal.hepsiburada i{border-radius:50%; background:transparent; border:1.5px solid var(--soluk)}
+.kanal.site i{transform:rotate(45deg)} .kanal.whatsapp i{border-radius:50% 50% 50% 0}
+
+.kalem{background:var(--kart); border:1px solid var(--cizgi); border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:8px; position:relative; text-align:left; width:100%}
+.kalem.s-kirmizi{border-color:color-mix(in srgb, var(--kirmizi) 45%, var(--cizgi))}
+.kalem-ust{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.kalem-ust .sag{margin-left:auto}
+.kalem-baslik{font-weight:700; font-size:15px; min-width:0}
+.kalem-alt{font-size:13px; color:var(--soluk)}
+.no{font-size:12px; color:var(--soluk); font-variant-numeric:tabular-nums}
+.metin{margin:0; font-size:14px}
+.bekleme{display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; font-size:13px; color:var(--soluk)}
+.bekleme b{font-size:18px; color:var(--yazi); font-variant-numeric:tabular-nums; font-weight:700}
+.s-kirmizi .bekleme b{color:var(--kirmizi)} .s-sari .bekleme b{color:var(--sari)}
+.bekleme .sn{font-size:12px}
+.kalem-eylem{display:flex; gap:8px; flex-wrap:wrap}
+.btn{border:1px solid var(--cizgi); background:var(--kart); border-radius:10px; padding:8px 12px; font-size:13px; font-weight:600}
+.btn:hover{border-color:var(--yazi)}
+.btn.birincil{background:var(--marka); border-color:var(--marka); color:var(--marka-on)}
+.btn.buyuk{padding:12px 16px; font-size:15px; flex:1}
+.soru{cursor:pointer}
+.soru.cevaplandi{opacity:.7}
+.uyari{display:flex; gap:6px; align-items:center; font-size:13px; font-weight:600; color:var(--sari)}
+.uyari svg{width:14px; height:14px}
+.sorumlu{font-size:13px; color:var(--soluk)} .sorumlu b{color:var(--yazi)}
+.gerisayim{font-size:13px; padding:6px 10px; background:var(--yuzey); border-radius:8px}
+.gerisayim b{font-variant-numeric:tabular-nums}
+.vurgu{animation:vurgu 1.4s ease-in-out 2}
+@keyframes vurgu{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 4px color-mix(in srgb, var(--marka) 45%, transparent)}}
+
+/* Bugün kartları */
+.sayac-kartlar{display:grid; grid-template-columns:1fr; gap:10px}
+.sayac{display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; column-gap:12px; row-gap:6px; align-items:center; background:var(--kart); border:1px solid var(--cizgi); border-radius:14px; padding:12px; text-align:left; width:100%}
+.sayac .sayi{grid-row:span 2; font-family:var(--f-govde); font-weight:700; font-size:34px; line-height:1; width:56px; height:56px; display:grid; place-items:center; border-radius:12px; font-variant-numeric:tabular-nums}
+.sayac.s-kirmizi .sayi{background:var(--kirmizi-zemin); color:var(--kirmizi)}
+.sayac.s-sari .sayi{background:var(--sari-zemin); color:var(--sari)}
+.sayac.s-yesil .sayi{background:var(--yesil-zemin); color:var(--yesil)}
+.sayac .ust{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.sayac .ust strong{font-family:var(--f-baslik); font-size:17px}
+.sayac .acil{font-size:13px; color:var(--soluk); min-width:0}
+.sayac .acil b{color:var(--yazi); font-weight:600}
+.ozet-mesaj{background:var(--kart); border:1px solid var(--cizgi); border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:8px}
+.ozet-mesaj .bas{display:flex; justify-content:space-between; gap:8px; font-size:12px; color:var(--soluk); flex-wrap:wrap}
+.balon-mesaj{background:var(--marka-zemin); border-radius:4px 14px 14px 14px; padding:10px 12px; font-size:14px; display:flex; flex-direction:column; gap:3px}
+.balon-mesaj .zaman{align-self:flex-end; font-size:11px; color:var(--soluk)}
+
+/* İade hattı */
+.hat{display:grid; grid-template-columns:repeat(5,1fr); gap:0; position:relative; margin-top:2px}
+.adim{display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px; position:relative; font-size:11px; line-height:1.2; padding:0 2px}
+.adim::before{content:""; position:absolute; top:9px; left:-50%; width:100%; height:2px; background:var(--cizgi); z-index:0}
+.adim:first-child::before{display:none}
+.adim.tamam::before, .adim.siradaki::before{background:var(--marka)}
+.adim.siradaki::before{background:repeating-linear-gradient(90deg, var(--marka) 0 4px, transparent 4px 7px)}
+.adim .top{width:20px; height:20px; border-radius:50%; border:2px solid var(--cizgi); background:var(--kart); position:relative; z-index:1; display:grid; place-items:center}
+.adim.tamam .top{background:var(--marka); border-color:var(--marka); color:var(--marka-on)}
+.adim.siradaki .top{border-color:var(--marka); border-style:dashed}
+.adim .top svg{width:12px; height:12px}
+.adim .et{font-weight:600}
+.adim .g{color:var(--soluk); font-variant-numeric:tabular-nums}
+.su-an{font-size:13px; color:var(--soluk)} .su-an b{color:var(--yazi)}
+.foto{display:flex; gap:6px; align-items:center; font-size:12px; color:var(--soluk)}
+.foto i{width:34px; height:34px; border-radius:6px; display:block; background:linear-gradient(135deg, var(--marka-zemin), color-mix(in srgb, var(--marka) 30%, var(--kart))); border:1px solid var(--cizgi)}
+.sinir{display:flex; flex-direction:column; gap:5px}
+.sinir .et{display:flex; justify-content:space-between; gap:8px; font-size:12px; color:var(--soluk); flex-wrap:wrap}
+.sinir .et b{color:var(--yazi); font-variant-numeric:tabular-nums}
+.cubuk{display:grid; gap:2px; height:10px}
+.cubuk span{background:var(--cizgi); border-radius:2px}
+.cubuk.s-yesil span.d{background:var(--yesil)}
+.cubuk.s-sari span.d{background:var(--sari-cizgi)}
+.cubuk.s-kirmizi span.d{background:repeating-linear-gradient(135deg, var(--kirmizi) 0 3px, color-mix(in srgb, var(--kirmizi) 60%, var(--kart)) 3px 5px)}
+
+/* Ayarlar */
+.ayar-grup{background:var(--kart); border:1px solid var(--cizgi); border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:10px}
+.ayar-grup h2{margin:0; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--soluk)}
+.ayar-satir{display:flex; flex-direction:column; gap:6px}
+.ayar-satir label, .ayar-satir .lbl{font-size:13px; font-weight:600}
+.ayar-satir .yardim{font-size:12px; color:var(--soluk)}
+input[type=text], select{font:inherit; font-size:15px; padding:9px 10px; border:1px solid var(--cizgi); border-radius:10px; background:var(--yuzey); color:var(--yazi); width:100%; min-width:0}
+.secim{display:flex; border:1px solid var(--cizgi); border-radius:10px; overflow:hidden; background:var(--yuzey)}
+.secim button{flex:1; border:0; background:none; padding:8px 4px; font-size:14px; font-weight:600; color:var(--soluk)}
+.secim button+button{border-left:1px solid var(--cizgi)}
+.secim button[aria-pressed="true"]{background:var(--marka); color:var(--marka-on)}
+.renkler{display:flex; gap:10px; flex-wrap:wrap}
+.renk{width:36px; height:36px; border-radius:50%; border:3px solid var(--kart); box-shadow:0 0 0 1px var(--cizgi)}
+.renk[aria-pressed="true"]{box-shadow:0 0 0 2px var(--yazi)}
+.anahtar-satir{display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:14px; padding:4px 0}
+.anahtar-satir small{display:block; color:var(--soluk); font-size:12px}
+.anahtar{width:46px; height:28px; border-radius:14px; border:0; background:var(--cizgi); position:relative; flex:none; transition:background var(--hiz)}
+.anahtar::after{content:""; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:var(--kart); transition:transform var(--hiz); box-shadow:var(--golge)}
+.anahtar[aria-checked="true"]{background:var(--marka)}
+.anahtar[aria-checked="true"]::after{transform:translateX(18px)}
+.ekip-satir{display:flex; align-items:center; gap:8px; font-size:14px}
+.ekip-satir .rol{color:var(--soluk); font-size:12px}
+.ekip-satir .sil{margin-left:auto; border:0; background:none; color:var(--soluk); font-size:13px; padding:4px 6px}
+.ekip-ekle{display:grid; grid-template-columns:1fr 1fr auto; gap:6px}
+.kurulum{display:flex; gap:10px; align-items:center; padding:12px; border-radius:14px; border:1.5px dashed var(--marka); font-weight:600}
+.kurulum b{font-family:var(--f-baslik); font-size:20px}
+
+/* Alt sayfa (sheet) */
+.perde{position:absolute; inset:0; background:rgba(10,12,14,.45); z-index:20; display:flex; align-items:flex-end; opacity:0; transition:opacity var(--hiz)}
+.perde.acik{opacity:1}
+.sheet{background:var(--kart); width:100%; max-height:88%; overflow-y:auto; border-radius:20px 20px 0 0; padding:10px max(16px, env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px, env(safe-area-inset-left,0px)); display:flex; flex-direction:column; gap:12px; transform:translateY(30px); transition:transform var(--hiz)}
+.perde.acik .sheet{transform:none}
+.sheet-tutamak{width:40px; height:5px; border-radius:3px; background:var(--cizgi); align-self:center}
+.sheet-bas{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.sheet-bas h3{margin:0; font-family:var(--f-baslik); font-size:20px}
+.kapat{border:0; background:var(--yuzey); width:34px; height:34px; border-radius:50%; font-size:20px; line-height:1}
+.taslak{border:1px solid var(--cizgi); border-radius:12px; overflow:hidden}
+.taslak-ust{display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; padding:8px 10px; background:var(--marka-zemin); font-size:12px}
+.taslak-ust b{color:var(--marka)}
+textarea{font:inherit; font-size:14px; width:100%; border:0; padding:10px; resize:vertical; background:var(--kart); color:var(--yazi); min-height:120px; display:block}
+textarea.duzenleniyor{background:var(--yuzey)}
+.onay-notu{display:flex; gap:8px; font-size:13px; margin:0; padding:10px; border-radius:10px; background:var(--yuzey)}
+.onay-notu svg{width:16px; height:16px; flex:none; margin-top:1px}
+.sheet-eylem{display:flex; gap:8px}
+.kisi-sec{display:flex; flex-direction:column; gap:6px}
+.kisi-sec button{display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid var(--cizgi); border-radius:12px; background:var(--kart); font-size:15px; font-weight:600}
+.kisi-sec button span{font-weight:400; color:var(--soluk); font-size:13px}
+.tarayici{border:1px solid var(--cizgi); border-radius:14px; overflow:hidden}
+.tarayici .adres{font-size:12px; padding:7px 10px; background:var(--yuzey); color:var(--soluk); border-bottom:1px solid var(--cizgi); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.musteri-sayfa{padding:16px; display:flex; flex-direction:column; gap:12px}
+.musteri-sayfa h4{margin:0; font-family:var(--f-baslik); font-size:22px}
+.musteri-sayfa p{margin:0}
+.dikey{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.dikey li{display:flex; gap:10px; align-items:center; font-size:14px}
+.dikey li .top{width:22px; height:22px; border-radius:50%; border:2px solid var(--cizgi); flex:none; display:grid; place-items:center}
+.dikey li.tamam .top{background:var(--marka); border-color:var(--marka); color:var(--marka-on)}
+.dikey li .top svg{width:12px; height:12px}
+.dikey li small{color:var(--soluk); margin-left:auto; font-variant-numeric:tabular-nums}
+.dikey li.bekliyor{color:var(--soluk)}
+.son-tarih{padding:10px; border-radius:10px; background:var(--marka-zemin)}
+
+.bildirim{position:absolute; top:52px; left:50%; transform:translate(-50%,-20px); background:var(--balon); color:var(--balon-yazi); padding:10px 16px; border-radius:999px; font-size:14px; font-weight:600; z-index:30; opacity:0; transition:opacity var(--hiz), transform var(--hiz); pointer-events:none; white-space:nowrap}
+.bildirim.goster{opacity:1; transform:translate(-50%,0)}
+
+/* ---------- dar ekran: çerçevesiz ---------- */
+@media (max-width:599px){
+  :root:not(.tur) .sahne{padding:0; display:block; height:100%}
+  :root:not(.tur) .demo{display:none}
+  :root:not(.tur) .telefon{width:100%; height:100%; min-height:0; border-radius:0; padding:0; box-shadow:none; background:var(--yuzey)}
+  :root:not(.tur) .ekran{border-radius:0}
+  :root:not(.tur) .durum-cubugu{display:none}
+  :root:not(.tur) .app-ust{padding-top:12px}
+}
+@media (min-width:600px) and (max-width:899px){
+  :root:not(.tur) .sahne{flex-direction:column; gap:20px}
+  :root:not(.tur) .demo{width:100%; max-width:414px}
+  :root:not(.tur) .neden{display:none}
+}
+
+/* ---------- sunum turu ---------- */
+:root.tur, :root.tur body{overflow:hidden}
+:root.tur .demo{display:none}
+:root.tur .sahne{display:block; padding:0; height:100%; position:relative}
+:root.tur .telefon{position:absolute; left:50%; top:14px; height:868px; min-height:0; transform-origin:top center; transform:translateX(-50%) scale(var(--olcek,1))}
+.altyazi{position:fixed; left:max(16px, env(safe-area-inset-left,0px)); right:max(16px, env(safe-area-inset-right,0px)); bottom:calc(22px + env(safe-area-inset-bottom,0px)); z-index:60; display:flex; justify-content:center; pointer-events:none}
+.altyazi span{background:var(--balon); color:var(--balon-yazi); font-family:var(--f-baslik); font-weight:700; font-size:clamp(20px, 5.2vw, 34px); line-height:1.15; padding:14px 22px; border-radius:18px; text-align:center; max-width:520px; text-wrap:balance; transition:opacity var(--hiz)}
+.altyazi span.sil{opacity:0}
+.imlec{position:fixed; left:0; top:0; width:38px; height:38px; margin:-19px 0 0 -19px; border-radius:50%; background:color-mix(in srgb, var(--balon) 30%, transparent); border:2px solid var(--balon-yazi); box-shadow:0 0 0 2px var(--balon); z-index:70; pointer-events:none; transition:transform 650ms cubic-bezier(.3,.7,.2,1)}
+@media (prefers-reduced-motion: reduce){.imlec{transition:transform 120ms linear}}
+.imlec .halka{position:absolute; inset:-2px; border-radius:50%; border:3px solid var(--balon)}
+.imlec.dokun .halka{animation:halka 450ms ease-out}
+@keyframes halka{from{transform:scale(1); opacity:1}to{transform:scale(2.2); opacity:0}}
+.kapanis{position:fixed; inset:0; z-index:80; background:var(--masa); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; text-align:center; padding:24px max(24px, env(safe-area-inset-right,0px)) 24px max(24px, env(safe-area-inset-left,0px)); opacity:0; transition:opacity 500ms}
+.kapanis.goster{opacity:1}
+.kapanis .wordmark{font-size:clamp(30px,11vw,48px); white-space:nowrap; justify-content:center}
+.kapanis .wordmark svg{width:40px; height:40px}
+.kapanis p{margin:0; font-family:var(--f-baslik); font-weight:700; font-size:28px; line-height:1.2; max-width:420px; text-wrap:balance}
+.kapanis .kur{font-family:var(--f-govde); font-weight:600; font-size:20px; padding:10px 18px; border-radius:999px; background:var(--balon); color:var(--balon-yazi)}
+</style>
+
+<div class="sahne">
+  <aside class="demo" aria-label="Demo kontrol">
+    <div>
+      <div class="wordmark"><svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="15" fill="none" stroke="currentColor" stroke-width="3"/><path d="M17 8v9l6 4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>Föy Operasyon</div>
+      <p style="margin-top:8px">Süresi kaçan işi önceden gösteren telefon paneli. Sorular, siparişler ve iadeler tek ekranda, gün ve saat sayacıyla.</p>
+    </div>
+    <div>
+      <h2>Örnek işletme</h2>
+      <div class="marka-sec" id="demo-markalar"></div>
+    </div>
+    <div>
+      <h2>Sunum modu</h2>
+      <div class="tur-linkler">
+        <a href="#tur-sorular">Sorular</a><a href="#tur-siparisler">Siparişler</a><a href="#tur-iadeler">İadeler</a><a href="#tur-kisisellestir">Kişiselleştir</a><a href="#tur-hepsi">Hepsi</a>
+      </div>
+    </div>
+    <div>
+      <h2>Neden</h2>
+      <ul class="neden">
+        <li>89 şikâyetin <b>32</b>'si: "günlerdir kargoya verilmedi".</li>
+        <li><b>30</b> şikâyette "cevap yok"; soru cevaplama süresi satıcı puanını etkiliyor.</li>
+        <li>İade ve değişim şikâyetlerde <b>40</b> kez geçiyor; bir ilanda sonuç iki ayrı sisteme elle işleniyor.</li>
+        <li>Sorun çoğu zaman ürün değil: ne olduğunu bilen yok.</li>
+      </ul>
+    </div>
+    <p style="font-size:12px">Örnek veri. Gerçek müşteri bilgisi yok, hiçbir mesaj gönderilmez.</p>
+  </aside>
+
+  <div class="telefon" id="telefon">
+    <div class="ekran" id="ekran">
+      <div class="durum-cubugu" aria-hidden="true"><span class="tn" id="saat">12:46</span><span class="pil"></span></div>
+      <header class="app-ust">
+        <div class="logo daire" id="logo">L</div>
+        <div style="min-width:0">
+          <div class="ad" id="marka-ad">Lâl Kozmetik</div>
+          <div class="alt" id="marka-alt">Föy Operasyon paneli</div>
+        </div>
+        <span class="ornek">Örnek veri</span>
+      </header>
+      <main class="icerik" id="icerik"></main>
+      <nav class="sekmeler" id="sekmeler" aria-label="Bölümler"></nav>
+      <div class="bildirim" id="bildirim" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+<div class="altyazi" id="altyazi" hidden><span></span></div>
+<div class="imlec" id="imlec" hidden><span class="halka"></span></div>
+<div class="kapanis" id="kapanis" hidden>
+  <div class="wordmark"><svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="15" fill="none" stroke="currentColor" stroke-width="3"/><path d="M17 8v9l6 4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>Föy Operasyon</div>
+  <p>Süresi kaçan işi önceden gösterir.</p>
+  <span class="kur">Kurulum 1 gün</span>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ================= sabitler ================= */
+const RENKLER = {
+  gul:{ad:"Koyu gül", a:"#9E2A4B", k:"#F07A9B"},
+  turuncu:{ad:"Turuncu", a:"#B9480F", k:"#FF9A5C"},
+  zeytin:{ad:"Zeytin", a:"#56631C", k:"#B9C86A"},
+  lacivert:{ad:"Lacivert", a:"#24448A", k:"#8FB0F5"},
+  petrol:{ad:"Petrol", a:"#0D6A70", k:"#5CCBD0"},
+  murdum:{ad:"Mürdüm", a:"#6B3A7D", k:"#C99BE0"}
+};
+const KANAL = {trendyol:"Trendyol", hepsiburada:"Hepsiburada", site:"Site", whatsapp:"WhatsApp"};
+const KANAL_SIRA = ["trendyol","hepsiburada","site","whatsapp"];
+const ADIM_ROL = ["Müşteri hizmetleri","Depo","Depo","Müşteri hizmetleri","Muhasebe"];
+const GUN = 86400000, DK = 60000;
+
+/* ================= marka config ================= */
+const MARKALAR = {
+lal:{
+  id:"lal", ad:"Lâl Kozmetik", sektor:"Cilt bakımı", harf:"L", sekil:"daire", renk:"gul", hitap:"siz",
+  soruHedefDk:60, kargoSaat:17, iadeSinir:14,
+  kanallar:{trendyol:true, hepsiburada:false, site:true, whatsapp:true},
+  ekip:[{ad:"Mehmet",rol:"Depo"},{ad:"Elif",rol:"Müşteri hizmetleri"},{ad:"Serkan",rol:"Muhasebe"}],
+  adimlar:["Talep","Depoya ulaştı","Kontrol","Onay","Para iadesi"],
+  not:"",
+  sorular:[
+    {id:"q1",k:"trendyol",m:"Zeynep A.",c:"k",u:"C Vitaminli Serum 30 ml",dk:132,konu:"Kargo süresi",
+     t:`Siparişimi 3 gün önce verdim, hâlâ kargoya verilmedi. Ne zaman gelir?`,
+     x:`Merhaba {ad}, beklettiğimiz için özür dileriz. [Siparişiniz|Siparişin] bugün {kesim} kadar kargoya verilecek; takip numarası [size|sana] SMS ile gelecek. Teslimat genelde 1–3 iş günü sürer. Sevgiyle, {marka}`},
+    {id:"q2",k:"whatsapp",m:"Merve T.",c:"k",u:"Gece Onarım Kremi 50 ml",dk:76,konu:"Ürün bilgisi",
+     t:`Karma cildim var, bu krem gözenek tıkar mı?`,
+     x:`Merhaba {ad}, Gece Onarım Kremi yağ içermeyen bir formüldür ve gözenek tıkamaz; karma ciltte rahatça [kullanabilirsiniz|kullanabilirsin]. İlk hafta gün aşırı, sonra her akşam [kullanmanızı|kullanmanı] öneririz. Sevgiyle, {marka}`},
+    {id:"q3",k:"site",m:"Burak Y.",c:"e",u:"Hyaluronik Asit Tonik 200 ml",dk:41,konu:"İade kuralı",
+     t:`Kutuyu açtım ama ürünü kullanmadım. İade edebilir miyim?`,
+     x:`Merhaba {ad}, ürünü teslim [aldığınız|aldığın] günden itibaren 14 gün içinde iade [edebilirsiniz|edebilirsin]. Şişenin hijyen bandı açılmadıysa iadeyi kabul ediyoruz. Hesabım > Siparişlerim sayfasında "İade et" [demeniz|demen] yeterli. Sevgiyle, {marka}`},
+    {id:"q4",k:"trendyol",m:"Selin D.",c:"k",u:"Güneş Kremi SPF 50",dk:23,konu:"Ürün bilgisi",
+     t:`Son kullanma tarihi ne zaman? Yaz için stok yapacağım.`,
+     x:`Merhaba {ad}, şu an gönderdiğimiz güneş kremlerinin son kullanma tarihi en erken 03/2028. Açtıktan sonra 12 ay içinde [kullanmanızı|kullanmanı] öneririz. Sevgiyle, {marka}`},
+    {id:"q5",k:"trendyol",m:"Hakan Ö.",c:"e",u:"Peeling Jel 100 ml",dk:12,konu:"Eksik ürün",
+     t:`İki tane sipariş ettim, kutudan bir tane çıktı.`,
+     x:`Merhaba {ad}, eksik gönderim için özür dileriz. Eksik ürünü bugün ayrı kargoyla gönderiyoruz; takip numarasını buradan ileteceğiz. [Sizin|Senin] bir şey yapmana gerek yok. Sevgiyle, {marka}`},
+    {id:"q6",k:"whatsapp",m:"Nur S.",c:"k",u:"Bakım Seti (3 ürün)",dk:5,konu:"Hediye paketi",
+     t:`Hediye paketi yapıyor musunuz? Not ekleyebilir miyim?`,
+     x:`Merhaba {ad}, evet, hediye paketi ücretsiz. Sipariş notuna [mesajınızı|mesajını] [yazarsanız|yazarsan] el yazısı bir kartla ekliyoruz. Sevgiyle, {marka}`},
+    {id:"q7",k:"site",m:"Ece B.",c:"k",u:"Göz Çevresi Kremi",dk:310,konu:"Ürün bilgisi",cevap:true,
+     t:`Hamilelikte kullanılabilir mi?`,
+     x:`Merhaba {ad}, Göz Çevresi Kremi retinol içermez; yine de hamilelikte doktorunuza [danışmanızı|danışmanı] öneririz. Sevgiyle, {marka}`}
+  ],
+  siparisler:[
+    {no:"TY-50213",k:"trendyol",m:"Zeynep A.",c:"k",u:"C Vitaminli Serum 30 ml",a:1,gun:3},
+    {no:"TY-50388",k:"trendyol",m:"Melis K.",c:"k",u:"Güneş Kremi SPF 50",a:2,gun:2},
+    {no:"WA-0931",k:"whatsapp",m:"Nur S.",c:"k",u:"Bakım Seti (3 ürün)",a:1,gun:1},
+    {no:"ST-1182",k:"site",m:"Burcu N.",c:"k",u:"Hyaluronik Asit Tonik",a:1,gun:1},
+    {no:"TY-50511",k:"trendyol",m:"Ahmet E.",c:"e",u:"Peeling Jel 100 ml",a:1,gun:0},
+    {no:"TY-50519",k:"trendyol",m:"Gamze Ş.",c:"k",u:"Gece Onarım Kremi 50 ml",a:1,gun:0,sorumlu:"Mehmet"},
+    {no:"TY-50102",k:"trendyol",m:"Hakan Ö.",c:"e",u:"Peeling Jel 100 ml",a:2,kargoda:true,takip:null},
+    {no:"ST-1176",k:"site",m:"Deniz U.",c:"k",u:"Göz Çevresi Kremi",a:1,kargoda:true,takip:"7741 2280 19"},
+    {no:"TY-50077",k:"trendyol",m:"Selin D.",c:"k",u:"Güneş Kremi SPF 50",a:1,kargoda:true,takip:"7741 2265 03"}
+  ],
+  iadeler:[
+    {no:"R-2038",k:"site",m:"Fatma G.",c:"k",u:"Bakım Seti (3 ürün)",tl:1240,gun:13,ag:[0,5]},
+    {no:"R-2041",k:"trendyol",m:"Ayşe K.",c:"k",u:"Göz Altı Kremi",tl:489,gun:12,ag:[0,6,9]},
+    {no:"R-2047",k:"trendyol",m:"Canan Y.",c:"k",u:"Hyaluronik Asit Tonik",tl:329,gun:6,ag:[0,4]},
+    {no:"R-2050",k:"whatsapp",m:"Murat B.",c:"e",u:"Güneş Kremi SPF 50",tl:398,gun:2,ag:[0]},
+    {no:"R-2029",k:"trendyol",m:"Elif S.",c:"k",u:"Peeling Jel 100 ml",tl:259,gun:11,ag:[0,3,4,5,8]}
+  ]
+},
+pitircik:{
+  id:"pitircik", ad:"Pıtırcık Oyuncak", sektor:"Oyuncak ve eğitici", harf:"P", sekil:"kare", renk:"turuncu", hitap:"sen",
+  soruHedefDk:120, kargoSaat:15, iadeSinir:14,
+  kanallar:{trendyol:true, hepsiburada:true, site:true, whatsapp:false},
+  ekip:[{ad:"Mehmet",rol:"Depo"},{ad:"Gül",rol:"Depo"},{ad:"Barış",rol:"Müşteri hizmetleri"},{ad:"Nalan",rol:"Muhasebe"}],
+  adimlar:["Talep","Depoya ulaştı","Kontrol","Onay","Para iadesi"],
+  not:"Kasım–Aralık yoğun dönem: sipariş sayısı yaklaşık iki katına çıkar. Kargo son saati 15:00, depoya ikinci kişi eklendi.",
+  sorular:[
+    {id:"p1",k:"hepsiburada",m:"Gökhan A.",c:"e",u:"Ahşap Sayı Treni",dk:185,konu:"Yaş uyarısı",
+     t:`2 yaşındaki oğluma alacağım, uygun mu? Küçük parça var mı?`,
+     x:`[Merhaba|Selam] {ad}! Ahşap Sayı Treni 3 yaş ve üzeri için. Vagonlardaki rakamlar küçük parça sayılıyor, bu yüzden 2 yaş için önermiyoruz. 2 yaşa uygun Büyük Ahşap Bloklar'a [bakabilirsiniz|bakabilirsin]. {marka}`},
+    {id:"p2",k:"trendyol",m:"Derya K.",c:"k",u:"Manyetik Yapı Blokları 64 Parça",dk:140,konu:"Kargo süresi",
+     t:`Siparişim 4 gündür "hazırlanıyor" görünüyor. Doğum gününe yetişir mi?`,
+     x:`[Merhaba|Selam] {ad}, gecikme için çok üzgünüz. [Siparişiniz|Siparişin] bugün {kesim} kadar kargoya veriliyor; 1–2 iş gününde [elinizde|elinde] olur. Takip numarası gelince hemen yazacağız. {marka}`},
+    {id:"p3",k:"site",m:"Emre Ç.",c:"e",u:"Sesli Hayvanlar Kitabı",dk:95,konu:"Ürün bilgisi",
+     t:`Pili bitince değiştirilebiliyor mu?`,
+     x:`[Merhaba|Selam] {ad}! Evet, kitabın arkasında vidalı bir pil kapağı var; 2 adet AAA pil ile çalışıyor. Kutudan çıkan piller yaklaşık 6 ay gider. {marka}`},
+    {id:"p4",k:"trendyol",m:"Aslı P.",c:"k",u:"Ahşap Mutfak Seti",dk:52,konu:"Değişim kuralı",
+     t:`Kutu ezik geldi, içi sağlam ama hediye olacaktı. Değişim yapar mısınız?`,
+     x:`[Merhaba|Selam] {ad}, ezik kutu için özür dileriz. Trendyol'dan "Değişim" talebi [açmanız|açman] yeterli; kargo ücreti bizden. Yeni ürünü ilk kargoyla gönderiyoruz. {marka}`},
+    {id:"p5",k:"hepsiburada",m:"Tolga M.",c:"e",u:"Kinetik Kum Seti 1 kg",dk:30,konu:"Güvenlik belgesi",
+     t:`Zehirli değil, değil mi? CE belgesi var mı?`,
+     x:`[Merhaba|Selam] {ad}, Kinetik Kum toksik değildir ve CE belgelidir; belgeyi ürün sayfasının "Belgeler" kısmında [görebilirsiniz|görebilirsin]. 3 yaş altı için önerilmez. {marka}`},
+    {id:"p6",k:"site",m:"Pınar E.",c:"k",u:"Dünya Haritası Yapboz 100 Parça",dk:8,konu:"Kampanya",
+     t:`Kasım indirimi olacak mı? Şimdi mi alayım?`,
+     x:`[Merhaba|Selam] {ad}! Kasım kampanyası 10 Kasım'da başlıyor. Şimdi [alırsanız|alırsan] ve fiyat düşerse farkı [size|sana] puan olarak iade ediyoruz. {marka}`},
+    {id:"p7",k:"trendyol",m:"Volkan S.",c:"e",u:"Ahşap Tren Rayı Ek Seti",dk:420,konu:"Ürün bilgisi",cevap:true,
+     t:`Başka markaların raylarıyla uyumlu mu?`,
+     x:`[Merhaba|Selam] {ad}, raylarımız standart ahşap ray ölçüsünde; yaygın setlerle uyumlu. {marka}`}
+  ],
+  siparisler:[
+    {no:"TY-88140",k:"trendyol",m:"Derya K.",c:"k",u:"Manyetik Yapı Blokları 64 Parça",a:1,gun:4},
+    {no:"HB-30552",k:"hepsiburada",m:"Serdar İ.",c:"e",u:"Ahşap Sayı Treni",a:1,gun:2},
+    {no:"TY-88177",k:"trendyol",m:"Ebru L.",c:"k",u:"Ahşap Mutfak Seti",a:1,gun:2},
+    {no:"ST-0419",k:"site",m:"Pınar E.",c:"k",u:"Dünya Haritası Yapboz",a:2,gun:1},
+    {no:"HB-30601",k:"hepsiburada",m:"Tolga M.",c:"e",u:"Kinetik Kum Seti 1 kg",a:1,gun:1},
+    {no:"TY-88230",k:"trendyol",m:"Seda R.",c:"k",u:"Sesli Hayvanlar Kitabı",a:1,gun:0},
+    {no:"TY-88231",k:"trendyol",m:"Kaan Y.",c:"e",u:"Ahşap Tren Rayı Ek Seti",a:1,gun:0,sorumlu:"Gül"},
+    {no:"HB-30488",k:"hepsiburada",m:"Gökhan A.",c:"e",u:"Büyük Ahşap Bloklar",a:1,kargoda:true,takip:null},
+    {no:"TY-88011",k:"trendyol",m:"Aslı P.",c:"k",u:"Ahşap Mutfak Seti",a:1,kargoda:true,takip:"3390 1182 44"},
+    {no:"ST-0402",k:"site",m:"Emre Ç.",c:"e",u:"Sesli Hayvanlar Kitabı",a:1,kargoda:true,takip:"3390 1170 08"}
+  ],
+  iadeler:[
+    {no:"R-0712",k:"hepsiburada",m:"Hande V.",c:"k",u:"Robot Kodlama Seti",tl:1890,gun:13,ag:[0,4,8]},
+    {no:"R-0718",k:"trendyol",m:"Cem T.",c:"e",u:"Manyetik Yapı Blokları 64 Parça",tl:749,gun:10,ag:[0,5]},
+    {no:"R-0722",k:"site",m:"Özge N.",c:"k",u:"Ahşap Mutfak Seti",tl:1150,gun:4,ag:[0,3]},
+    {no:"R-0725",k:"trendyol",m:"Burak Ş.",c:"e",u:"Kinetik Kum Seti 1 kg",tl:289,gun:1,ag:[0]},
+    {no:"R-0701",k:"trendyol",m:"Melek A.",c:"k",u:"Dünya Haritası Yapboz",tl:219,gun:9,ag:[0,2,3,4,6]}
+  ]
+},
+keten:{
+  id:"keten", ad:"Keten Ev", sektor:"Ev tekstili", harf:"K", sekil:"yaprak", renk:"zeytin", hitap:"siz",
+  soruHedefDk:240, kargoSaat:16, iadeSinir:14,
+  kanallar:{trendyol:true, hepsiburada:false, site:true, whatsapp:true},
+  ekip:[{ad:"Mehmet",rol:"Depo"},{ad:"Şule",rol:"Müşteri hizmetleri"},{ad:"Ali",rol:"Muhasebe"}],
+  adimlar:["Talep","Depoya ulaştı","Kalite kontrol fotoğrafı","Onay","Para iadesi"],
+  foto:true,
+  not:"",
+  sorular:[
+    {id:"k1",k:"whatsapp",m:"Canan Ö.",c:"k",u:"Keten Nevresim Takımı, Çift",dk:290,konu:"Bakım bilgisi",
+     t:`Yıkayınca çeker mi? Kaç derecede yıkamalıyım?`,
+     x:`Merhaba {ad}, nevresimlerimiz önceden yıkanmış ketendir; ilk yıkamada en fazla %2 çeker. 30 derecede, düşük devirde [yıkamanızı|yıkamanı] ve kurutma makinesi [kullanmamanızı|kullanmamanı] öneririz. Selamlar, {marka}`},
+    {id:"k2",k:"site",m:"Levent G.",c:"e",u:"Waffle Pike, Adaçayı",dk:200,konu:"Değişim kuralı",
+     t:`Renk fotoğraftakinden açık geldi, değiştirmek istiyorum.`,
+     x:`Merhaba {ad}, [beklediğiniz|beklediğin] renk gelmediyse çok üzgünüz. 14 gün içinde ücretsiz değişim [yapabilirsiniz|yapabilirsin]; kargo kodunu SMS ile gönderiyoruz. Ürün depomuza ulaşınca kalite kontrol fotoğrafını da [sizinle|seninle] paylaşacağız. Selamlar, {marka}`},
+    {id:"k3",k:"trendyol",m:"Sibel A.",c:"k",u:"Keten Masa Örtüsü 160x220",dk:130,konu:"Ürün ölçüsü",
+     t:`Tam ölçüsü kaç? 8 kişilik masaya olur mu?`,
+     x:`Merhaba {ad}, örtünün yıkama sonrası ölçüsü 158x218 cm. 90x180 cm'lik 8 kişilik masada her yandan yaklaşık 20 cm sarkar. Selamlar, {marka}`},
+    {id:"k4",k:"whatsapp",m:"Oya T.",c:"k",u:"Pamuk Havlu Seti",dk:64,konu:"Toptan satış",
+     t:`Butik otelimiz için 40 takım almak istiyoruz, toptan fiyat var mı?`,
+     x:`Merhaba {ad}, 20 takım üzeri siparişlerde %15 indirim uyguluyoruz. Renk ve nakış seçeneklerini içeren teklifi bugün [size|sana] gönderelim mi? Selamlar, {marka}`},
+    {id:"k5",k:"site",m:"Kerem B.",c:"e",u:"Keten Perde 140x260",dk:25,konu:"Kargo süresi",
+     t:`Siparişim ne zaman kargoya verilir?`,
+     x:`Merhaba {ad}, perdeler ölçüye göre dikildiği için 2 iş gününde kargoya veriliyor. [Siparişiniz|Siparişin] yarın {kesim} kadar kargoda olacak. Selamlar, {marka}`},
+    {id:"k6",k:"trendyol",m:"Hülya D.",c:"k",u:"Yastık Kılıfı 50x70",dk:6,konu:"Ürün bilgisi",
+     t:`Paket ikili mi tekli mi?`,
+     x:`Merhaba {ad}, yastık kılıfları ikili pakettir; fiyat iki adet içindir. Selamlar, {marka}`},
+    {id:"k7",k:"site",m:"Ozan K.",c:"e",u:"Pike Takımı",dk:500,konu:"Ürün bilgisi",cevap:true,
+     t:`Pike kaç gram?`, x:`Merhaba {ad}, pikemiz 650 gr/m². Selamlar, {marka}`}
+  ],
+  siparisler:[
+    {no:"ST-2207",k:"site",m:"Nihan Ç.",c:"k",u:"Keten Nevresim Takımı, Çift",a:1,gun:3},
+    {no:"WA-0144",k:"whatsapp",m:"Oya T.",c:"k",u:"Pamuk Havlu Seti",a:4,gun:2},
+    {no:"TY-61902",k:"trendyol",m:"Sibel A.",c:"k",u:"Keten Masa Örtüsü 160x220",a:1,gun:1},
+    {no:"ST-2215",k:"site",m:"Kerem B.",c:"e",u:"Keten Perde 140x260",a:2,gun:1},
+    {no:"TY-61944",k:"trendyol",m:"Hülya D.",c:"k",u:"Yastık Kılıfı 50x70",a:2,gun:0},
+    {no:"ST-2219",k:"site",m:"Tuncay E.",c:"e",u:"Waffle Pike, Kum",a:1,gun:0,sorumlu:"Mehmet"},
+    {no:"TY-61870",k:"trendyol",m:"Gizem K.",c:"k",u:"Keten Peçete 6'lı",a:1,kargoda:true,takip:null},
+    {no:"ST-2190",k:"site",m:"Levent G.",c:"e",u:"Waffle Pike, Adaçayı",a:1,kargoda:true,takip:"5521 0093 61"}
+  ],
+  iadeler:[
+    {no:"R-0339",k:"site",m:"Levent G.",c:"e",u:"Waffle Pike, Adaçayı",tl:1450,gun:12,ag:[0,4,7]},
+    {no:"R-0341",k:"trendyol",m:"Deniz A.",c:"k",u:"Keten Nevresim Takımı, Tek",tl:2190,gun:13,ag:[0,6]},
+    {no:"R-0346",k:"whatsapp",m:"Rana S.",c:"k",u:"Keten Perde 140x260",tl:1780,gun:5,ag:[0,3]},
+    {no:"R-0330",k:"site",m:"Okan B.",c:"e",u:"Pamuk Havlu Seti",tl:690,gun:10,ag:[0,2,3,5,7]}
+  ]
+}
+};
+
+/* ================= zaman ================= */
+let SAPMA = 0;
+(function(){
+  const d = new Date(), dk = d.getHours()*60 + d.getMinutes();
+  if(dk < 9*60 || dk > 13*60+30){ const h = new Date(d); h.setHours(12,46,0,0); SAPMA = h - d; }
+})();
+const simdi = () => Date.now() + SAPMA;
+const pad = n => String(n).padStart(2,"0");
+const EK = {9:"a",10:"a",11:"e",12:"ye",13:"e",14:"e",15:"e",16:"ya",17:"ye",18:"e",19:"a",20:"ye"};
+const saatYe = h => `${pad(h)}:00'${EK[h]||"e"}`;
+function sure(ms, sn){
+  ms = Math.max(0, ms); const t = Math.floor(ms/1000);
+  const g = Math.floor(t/86400), s = Math.floor(t%86400/3600), d = Math.floor(t%3600/60), x = t%60;
+  if(g > 0) return `${g} gün ${s} sa`;
+  if(s > 0) return `${s} sa ${pad(d)} dk` + (sn ? ` <span class="sn">${pad(x)} sn</span>` : "");
+  return `${d} dk` + (sn ? ` <span class="sn">${pad(x)} sn</span>` : "");
+}
+const AYLAR = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+const GUNLER = ["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+const tarih = ms => { const d = new Date(ms); return `${d.getDate()} ${AYLAR[d.getMonth()]}`; };
+
+/* ================= durum ================= */
+let D = null;           // etkin marka (kopya)
+let sekme = "bugun";
+let sheetAcik = false;
+
+function markaYukle(id){
+  const m = MARKALAR[id] || MARKALAR.lal;
+  const c = JSON.parse(JSON.stringify(m));
+  const n = simdi();
+  c.sorular.forEach((q,i) => { q.bas = n - q.dk*DK - (i*13 % 50)*1000; q.durum = q.cevap ? "cevaplandi" : "bekliyor"; q.gonderilen = q.cevap ? "" : null; });
+  c.siparisler.forEach((s,i) => { s.bas = n - (s.gun||0)*GUN - (3 + i%5)*3600000; s.mesaj = false; });
+  c.iadeler.forEach((r,i) => { r.bas = n - r.gun*GUN - (2 + i)*3600000; });
+  D = c;
+  try{ localStorage.setItem("vakit-marka", id); }catch(e){}
+  temaUygula();
+}
+function temaUygula(){
+  const r = RENKLER[D.renk] || RENKLER.gul, st = document.documentElement.style;
+  st.setProperty("--marka-a", r.a); st.setProperty("--marka-k", r.k);
+  const logo = document.getElementById("logo");
+  logo.className = "logo " + D.sekil; logo.textContent = (D.ad.trim()[0] || "?").toLocaleUpperCase("tr");
+  document.getElementById("marka-ad").textContent = D.ad || "İsimsiz işletme";
+  document.getElementById("marka-alt").textContent = D.sektor + " · Föy Operasyon paneli";
+  document.querySelectorAll("#demo-markalar .marka-btn").forEach(b => b.setAttribute("aria-pressed", b.dataset.marka === D.id));
+}
+
+/* metin şablonu: {ad} {marka} {kesim} ve [siz|sen] */
+function hitapAd(m, c){ const ilk = m.split(" ")[0]; return D.hitap === "siz" ? `${ilk} ${c === "k" ? "Hanım" : "Bey"}` : ilk; }
+function sablon(str, o){
+  return str.replace(/\{ad\}/g, hitapAd(o.m, o.c)).replace(/\{marka\}/g, D.ad).replace(/\{kesim\}/g, saatYe(D.kargoSaat))
+    .replace(/\[([^|\]]*)\|([^\]]*)\]/g, (_, a, b) => D.hitap === "siz" ? a : b);
+}
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[ch]);
+const acik = k => D.kanallar[k];
+
+/* durum hesapları */
+function soruDurum(q){
+  if(q.durum === "cevaplandi") return "yesil";
+  const g = simdi() - q.bas, h = D.soruHedefDk*DK;
+  return g > h ? "kirmizi" : g > h*0.7 ? "sari" : "yesil";
+}
+function kesimMs(){ const d = new Date(simdi()); d.setHours(D.kargoSaat,0,0,0); return +d; }
+function sipGrup(s){ return s.kargoda ? "yolda" : s.gun >= 2 ? "gecikti" : "bugun"; }
+function sipDurum(s){ const g = sipGrup(s); return g === "gecikti" ? "kirmizi" : g === "bugun" ? "sari" : (s.takip ? "yesil" : "sari"); }
+function iadeAdim(r){ return r.ag.length - 1; }
+function iadeGun(r){ return Math.floor((simdi() - r.bas)/GUN); }
+function iadeBitti(r){ return iadeAdim(r) >= 4; }
+function iadeEsik(){ const n = D.iadeSinir; return {sari: Math.ceil(n*0.7), kirmizi: n-1}; }
+function iadeDurum(r){
+  if(iadeBitti(r)) return "yesil";
+  const g = iadeGun(r), e = iadeEsik();
+  return g >= e.kirmizi ? "kirmizi" : g >= e.sari ? "sari" : "yesil";
+}
+const AGIRLIK = {kirmizi:2, sari:1, yesil:0};
+const enKotu = arr => arr.reduce((a,b) => AGIRLIK[b] > AGIRLIK[a] ? b : a, "yesil");
+
+const soruListe = () => D.sorular.filter(q => acik(q.k));
+const sipListe = () => D.siparisler.filter(s => acik(s.k));
+const iadeListe = () => D.iadeler.filter(r => acik(r.k));
+const acikSorular = () => soruListe().filter(q => q.durum !== "cevaplandi").sort((a,b) => a.bas - b.bas);
+const acikSip = () => sipListe().filter(s => sipGrup(s) !== "yolda").sort((a,b) => b.gun - a.gun);
+const acikIade = () => iadeListe().filter(r => !iadeBitti(r)).sort((a,b) => iadeGun(b) - iadeGun(a));
+
+/* ================= ikonlar ================= */
+const IK = {
+  kirmizi:`<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 15 14H1z" fill="currentColor"/><path d="M8 6v3.6M8 11.4v.1" stroke="var(--kart)" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  sari:`<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 4.5V8l2.3 1.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  yesil:`<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="m4.8 8.2 2.2 2.2 4.2-4.4" fill="none" stroke="var(--kart)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  tik:`<svg viewBox="0 0 12 12" aria-hidden="true"><path d="m2.5 6.2 2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  kilit:`<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.3 7V5a2.7 2.7 0 0 1 5.4 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>`,
+  bilgi:`<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 7v4.5M8 4.6v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  bugun:`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+  sorular:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
+  siparisler:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z M3.5 7.5 12 12l8.5-4.5M12 12v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
+  iadeler:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 -2)"/></svg>`,
+  ayarlar:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.3" fill="none" stroke="currentColor" stroke-width="2"/></svg>`
+};
+const DURUM_ET = {soru:{kirmizi:"Hedef aşıldı", sari:"Hedefe yakın", yesil:"Süre içinde"}};
+const rozet = (d, metin) => `<span class="rozet r-${d}">${IK[d]}${esc(metin)}</span>`;
+const kanal = k => `<span class="kanal ${k}"><i></i>${KANAL[k]}</span>`;
+
+/* ================= çizim ================= */
+const $ = s => document.querySelector(s);
+const icerik = $("#icerik");
+const SEKMELER = [["bugun","Bugün"],["sorular","Sorular"],["siparisler","Siparişler"],["iadeler","İadeler"],["ayarlar","Ayarlar"]];
+
+function sekmeCiz(){
+  const k = {
+    sorular: acikSorular().filter(q => soruDurum(q) === "kirmizi").length,
+    siparisler: acikSip().filter(s => sipDurum(s) === "kirmizi").length,
+    iadeler: acikIade().filter(r => iadeDurum(r) === "kirmizi").length
+  };
+  $("#sekmeler").innerHTML = SEKMELER.map(([id, ad]) =>
+    `<button class="sekme" data-sekme="${id}" ${sekme === id ? 'aria-current="page"' : ""}>${IK[id]}${ad}${k[id] ? `<span class="rozet-sayi" aria-label="${k[id]} kırmızı">${k[id]}</span>` : ""}</button>`).join("");
+}
+function ciz(){
+  sekmeCiz();
+  const f = {bugun:cizBugun, sorular:cizSorular, siparisler:cizSiparisler, iadeler:cizIadeler, ayarlar:cizAyarlar}[sekme];
+  const odak = document.activeElement && document.activeElement.id;
+  icerik.innerHTML = f();
+  if(odak){ const e = document.getElementById(odak); if(e) e.focus({preventScroll:true}); }
+  tik();
+}
+function sekmeyeGit(id){ sekme = id; icerik.scrollTop = 0; ciz(); }
+
+function kapaliNotu(){
+  const k = KANAL_SIRA.filter(x => MARKALAR[D.id].kanallar[x] && !D.kanallar[x]);
+  return k.length ? `<p class="bilgi-not">${IK.bilgi}<span>Kapalı kanal: ${k.map(x => KANAL[x]).join(", ")}. Bu kanalın işleri listede gösterilmiyor.</span></p>` : "";
+}
+
+function cizBugun(){
+  const qs = acikSorular(), ss = acikSip(), rs = acikIade();
+  const qd = qs.map(soruDurum), sd = sipListe().map(sipDurum), rd = rs.map(iadeDurum);
+  const kir = [...qd, ...sd, ...rd].filter(x => x === "kirmizi").length;
+  const sar = [...qd, ...sd, ...rd].filter(x => x === "sari").length;
+  const d = new Date(simdi());
+  const cumle = (kir ? `<span class="k">${kir} iş kırmızı</span>` : "Kırmızı iş yok") + ", " + (sar ? `<span class="s">${sar} iş bugün bitmeli</span>.` : "bugün bitmesi gereken iş kalmadı.");
+  const q0 = qs[0], s0 = ss[0], r0 = rs[0];
+  const kart = (id, ad, sayi, dur, acil, ek) =>
+    `<button class="sayac s-${dur}" data-git="${id}" data-kart="${id}"><span class="sayi">${sayi}</span>
+      <span class="ust"><strong>${ad}</strong>${rozet(dur, ek)}</span>
+      <span class="acil">${acil}</span></button>`;
+  const qk = qd.filter(x => x === "kirmizi").length, sk = ss.filter(s => sipGrup(s) === "gecikti").length, rk = rd.filter(x => x !== "yesil").length;
+  const kesimKalan = kesimMs() - simdi();
+  return `
+  <div class="sayfa-bas"><p>${GUNLER[d.getDay()]}, ${tarih(simdi())} · Günaydın</p></div>
+  <p class="ozet-cumle" data-ozet>${cumle}</p>
+  ${D.not ? `<p class="bilgi-not">${IK.bilgi}<span>${esc(D.not)}</span></p>` : ""}
+  <div class="sayac-kartlar">
+    ${kart("sorular","Sorular", qs.length, enKotu(qd), q0 ? `En eski: <b>${esc(q0.m)}</b> · <span class="canli" data-bas="${q0.bas}">${sure(simdi()-q0.bas)}</span> bekliyor` : "Bekleyen soru yok", qk ? `${qk} hedef aşıldı` : "Süre içinde")}
+    ${kart("siparisler","Siparişler", ss.length, enKotu(ss.map(sipDurum)), s0 ? `En acil: <b>#${s0.no}</b> · ${s0.gun >= 1 ? s0.gun + " gündür kargoya verilmedi" : "bugün çıkmalı"}` : "Kargolanmayan sipariş yok", sk ? `${sk} gecikti` : "Gecikme yok")}
+    ${kart("iadeler","İadeler", rs.length, enKotu(rd), r0 ? `En acil: <b>${r0.no}</b> · ödeme sınırının ${iadeGun(r0)}. günü (${D.iadeSinir} gün)` : "Açık iade yok", rk ? `${rk} sınıra yakın` : "Süre içinde")}
+  </div>
+  <section class="ozet-mesaj" aria-label="Sabah özeti">
+    <div class="bas"><strong style="color:var(--yazi)">Sabah özeti</strong><span>Her sabah 08:30 · WhatsApp veya Telegram</span></div>
+    <div class="balon-mesaj">
+      <span>Günaydın, ${esc(D.ad)}. Bugün ${tarih(simdi())}.</span>
+      <span>Sorular: ${qs.length} bekliyor · hedefi aşan: ${qk}</span>
+      <span>Siparişler: ${ss.filter(s => sipGrup(s) === "bugun").length} sipariş ${saatYe(D.kargoSaat)} kadar çıkmalı · geciken: ${sk}</span>
+      <span>İadeler: ödeme sınırına 4 gün ya da daha az kalan: ${rs.filter(r => D.iadeSinir - iadeGun(r) <= 4).length}</span>
+      <span class="zaman tn">08:30</span>
+    </div>
+  </section>
+  <p class="kalem-alt" style="margin:0">Kargo son saatine <b class="tn canli-kesim" style="color:var(--yazi)">${kesimKalan > 0 ? sure(kesimKalan) : "süre doldu"}</b> kaldı.</p>`;
+}
+
+function cizSorular(){
+  const qs = acikSorular(), bitti = soruListe().filter(q => q.durum === "cevaplandi");
+  const kart = q => {
+    const d = soruDurum(q), c = q.durum === "cevaplandi";
+    return `<article class="kalem soru s-${c ? "yesil" : d}${c ? " cevaplandi" : ""}" data-soru="${q.id}" tabindex="0" role="button" aria-label="${esc(q.m)} sorusunu aç">
+      <div class="kalem-ust">${kanal(q.k)}<span class="no">${esc(q.m)}</span><span class="sag">${c ? rozet("yesil","Cevaplandı") : rozet(d, DURUM_ET.soru[d])}</span></div>
+      <div class="kalem-alt">${esc(q.u)}</div>
+      <p class="metin">${esc(q.t)}</p>
+      ${c ? "" : `<div class="bekleme"><b class="canli" data-bas="${q.bas}" data-sn="1">${sure(simdi()-q.bas, true)}</b> bekliyor · hedef ${D.soruHedefDk/60} sa</div>`}
+    </article>`;
+  };
+  return `
+  <div class="sayfa-bas"><h1>Sorular</h1><p>Tüm kanallar tek listede. En uzun bekleyen en üstte.</p></div>
+  <p class="onay-notu">${IK.kilit}<span>Yapay zekâ her soruya taslak hazırlar. <b>Siz onaylamadan hiçbir cevap gitmez.</b></span></p>
+  ${kapaliNotu()}
+  <div class="grup-bas"><span>Bekliyor</span><span class="tn">${qs.length}</span></div>
+  <div class="liste">${qs.map(kart).join("") || `<p class="kalem-alt">Bekleyen soru yok.</p>`}</div>
+  ${bitti.length ? `<div class="grup-bas"><span>Cevaplandı</span><span class="tn">${bitti.length}</span></div><div class="liste">${bitti.map(kart).join("")}</div>` : ""}`;
+}
+
+function cizSiparisler(){
+  const ls = sipListe();
+  const g = {gecikti:[], bugun:[], yolda:[]};
+  ls.forEach(s => g[sipGrup(s)].push(s));
+  g.gecikti.sort((a,b) => b.gun - a.gun); g.bugun.sort((a,b) => b.gun - a.gun); g.yolda.sort((a,b) => (a.takip ? 1 : 0) - (b.takip ? 1 : 0));
+  const kesim = kesimMs();
+  const kart = s => {
+    const grp = sipGrup(s), d = sipDurum(s);
+    const kisi = D.ekip.find(e => e.ad === s.sorumlu);
+    const etiket = grp === "gecikti" ? "Gecikti" : grp === "bugun" ? "Bugün çıkmalı" : (s.takip ? "Yolda" : "Takip no eksik");
+    return `<article class="kalem siparis s-${d}" data-siparis="${s.no}">
+      <div class="kalem-ust">${kanal(s.k)}<span class="no">#${s.no}</span><span class="sag">${rozet(d, etiket)}</span></div>
+      <div class="kalem-baslik">${esc(s.u)}${s.a > 1 ? ` · ${s.a} adet` : ""}</div>
+      <div class="kalem-alt">${esc(s.m)}</div>
+      ${grp !== "yolda" ? `<div class="bekleme"><b>${s.gun === 0 ? "Bugün" : s.gun + " gündür"}</b>${s.gun === 0 ? "geldi, henüz kargoda değil" : "kargoya verilmedi"}</div>
+        <div class="gerisayim" data-gs>${kesim > simdi() ? `${KANAL[s.k]} son teslim ${saatYe(D.kargoSaat)} <b class="canli" data-hedef="${kesim}">${sure(kesim - simdi())}</b>` : `Bugünkü ${pad(D.kargoSaat)}:00 geçti; yarın ilk iş çıkmalı.`}</div>` : ""}
+      ${grp === "yolda" && !s.takip ? `<div class="uyari">${IK.sari}Kargoda görünüyor ama takip numarası girilmedi. Müşteri takip edemiyor.</div>` : ""}
+      ${grp === "yolda" && s.takip ? `<div class="kalem-alt tn">Takip no: ${s.takip}</div>` : ""}
+      ${s.mesaj ? `<div class="kalem-alt" style="color:var(--yesil)">${IK.tik.replace('viewBox','width="12" height="12" viewBox')} Gecikme mesajı gönderildi (demo)</div>` : ""}
+      ${grp !== "yolda" || !s.takip ? `<div class="sorumlu">${kisi ? `Sorumlu: <b>${esc(kisi.ad)}</b> · ${esc(kisi.rol)}` : "Sorumlu atanmadı"}</div>
+      <div class="kalem-eylem">
+        ${grp !== "yolda" ? `<button class="btn" data-eylem="gecikme" data-id="${s.no}">Müşteriye gecikme mesajı</button>` : ""}
+        <button class="btn" data-eylem="ata-ac" data-id="${s.no}">${kisi ? "Sorumluyu değiştir" : "Sorumlu ata"}</button>
+      </div>` : ""}
+    </article>`;
+  };
+  const blok = (ad, arr, bos) => `<div class="grup-bas"><span>${ad}</span><span class="tn">${arr.length}</span></div><div class="liste">${arr.map(kart).join("") || `<p class="kalem-alt">${bos}</p>`}</div>`;
+  return `
+  <div class="sayfa-bas"><h1>Siparişler</h1><p>Kargoya verilmeyen her sipariş gün gün sayılır.</p></div>
+  ${D.not ? `<p class="bilgi-not">${IK.bilgi}<span>${esc(D.not)}</span></p>` : ""}
+  ${kapaliNotu()}
+  ${blok("Gecikti", g.gecikti, "Geciken sipariş yok.")}
+  ${blok("Bugün bitmeli", g.bugun, "Bugün çıkacak sipariş yok.")}
+  ${blok("Yolda", g.yolda, "Yolda sipariş yok.")}`;
+}
+
+function cizIadeler(){
+  const ls = iadeListe().slice().sort((a,b) => (iadeBitti(a) - iadeBitti(b)) || (iadeGun(b) - iadeGun(a)));
+  const kart = r => {
+    const a = iadeAdim(r), g = iadeGun(r), d = iadeDurum(r), bit = iadeBitti(r);
+    const sonG = bit ? r.ag[4] : g;
+    const hat = D.adimlar.map((ad, i) => {
+      const cls = i <= a ? "tamam" : i === a+1 ? "siradaki" : "";
+      const alt = i <= a ? `${r.ag[i]}. gün` : i === a+1 ? `${g - r.ag[a]} gündür` : "";
+      return `<div class="adim ${cls}"><span class="top">${i <= a ? IK.tik : ""}</span><span class="et">${ad}</span><span class="g">${alt}</span></div>`;
+    }).join("");
+    const rol = ADIM_ROL[a+1], kisi = D.ekip.find(e => e.rol === rol) || D.ekip[0];
+    const kalan = D.iadeSinir - g;
+    const et = bit ? `Para iadesi ${r.ag[4]}. günde yapıldı` : kalan > 0 ? `${kalan} gün kaldı` : `Sınır ${-kalan} gün aşıldı`;
+    const hucre = Array.from({length:D.iadeSinir}, (_, i) => `<span class="${i < Math.min(sonG, D.iadeSinir) ? "d" : ""}"></span>`).join("");
+    const rozetMetin = bit ? "Tamamlandı" : d === "kirmizi" ? "Sınırda" : d === "sari" ? "Sınıra yakın" : "Süre içinde";
+    return `<article class="kalem iade s-${d}" data-iade="${r.no}">
+      <div class="kalem-ust">${kanal(r.k)}<span class="no">${r.no}</span><span class="sag">${rozet(d, rozetMetin)}</span></div>
+      <div class="kalem-baslik">${esc(r.u)} · <span class="tn">${r.tl.toLocaleString("tr-TR")} TL</span></div>
+      <div class="kalem-alt">${esc(r.m)}</div>
+      <div class="hat" aria-label="İade adımları">${hat}</div>
+      ${bit ? "" : `<div class="su-an">Sıradaki: <b>${D.adimlar[a+1]}</b> · Sorumlu: <b>${esc(kisi ? kisi.ad : "atanmadı")}</b>${kisi ? " (" + esc(kisi.rol) + ")" : ""}</div>`}
+      ${D.foto && a >= 2 ? `<div class="foto"><i></i><i></i><span>Kalite kontrol fotoğrafı, 2 adet</span></div>` : ""}
+      <div class="sinir" data-sinir>
+        <div class="et"><span>İade ödeme sınırı: <b>${Math.min(sonG, 99)}. gün / ${D.iadeSinir}</b></span><span>${et}</span></div>
+        <div class="cubuk s-${d}" style="grid-template-columns:repeat(${D.iadeSinir},1fr)">${hucre}</div>
+      </div>
+      <div class="kalem-eylem">
+        ${bit ? "" : `<button class="btn birincil" data-eylem="ilerlet" data-id="${r.no}">Adımı ilerlet: ${D.adimlar[a+1]}</button>`}
+        <button class="btn" data-eylem="baglanti" data-id="${r.no}">Müşteriye durum bağlantısı</button>
+      </div>
+    </article>`;
+  };
+  return `
+  <div class="sayfa-bas"><h1>İadeler</h1><p>Her iadenin hangi adımda olduğu ve kimde beklediği. Süre, cayma bildiriminden itibaren sayılır.</p></div>
+  ${kapaliNotu()}
+  <div class="liste">${ls.map(kart).join("") || `<p class="kalem-alt">İade yok.</p>`}</div>`;
+}
+
+function cizAyarlar(){
+  const sec = (ad, deger, secenekler) => `<div class="secim" role="group">${secenekler.map(([v, et]) => `<button id="ay-${ad}-${v}" data-ayar="${ad}" data-v="${v}" aria-pressed="${String(deger) === String(v)}">${et}</button>`).join("")}</div>`;
+  const saatler = [12,13,14,15,16,17,18];
+  return `
+  <div class="sayfa-bas"><h1>Kişiselleştir</h1><p>Değişiklikler anında uygulanır. Aynı panel, sizin işletmenize göre.</p></div>
+  <section class="ayar-grup">
+    <h2>Örnek işletme</h2>
+    ${sec("marka", D.id, [["lal","Lâl"],["pitircik","Pıtırcık"],["keten","Keten"]])}
+  </section>
+  <section class="ayar-grup">
+    <h2>Marka</h2>
+    <div class="ayar-satir"><label for="ay-ad">Marka adı</label><input type="text" id="ay-ad" value="${esc(D.ad)}" maxlength="32" autocomplete="off"></div>
+    <div class="ayar-satir"><span class="lbl">Ana renk</span>
+      <div class="renkler">${Object.entries(RENKLER).map(([k, r]) => `<button class="renk" id="ay-renk-${k}" data-ayar="renk" data-v="${k}" aria-pressed="${D.renk === k}" aria-label="${r.ad}" style="background:${r.a}"></button>`).join("")}</div>
+    </div>
+    <div class="ayar-satir"><span class="lbl">Müşteriye hitap</span>${sec("hitap", D.hitap, [["siz","Siz"],["sen","Sen"]])}<span class="yardim">Taslak cevaplar ve müşteri mesajları bu dille yazılır.</span></div>
+  </section>
+  <section class="ayar-grup">
+    <h2>Süreler</h2>
+    <div class="ayar-satir"><span class="lbl">Soru cevap hedefi</span>${sec("hedef", D.soruHedefDk, [[60,"1 sa"],[120,"2 sa"],[240,"4 sa"]])}<span class="yardim">Bu süreyi aşan soru kırmızı olur.</span></div>
+    <div class="ayar-satir"><label for="ay-kargo">Kargo son saati</label>
+      <select id="ay-kargo" data-ayar="kargo">${saatler.map(h => `<option value="${h}" ${D.kargoSaat === h ? "selected" : ""}>${pad(h)}:00</option>`).join("")}</select></div>
+    <div class="ayar-satir"><span class="lbl">İade ödeme sınırı</span>${sec("sinir", D.iadeSinir, [[10,"10 gün"],[14,"14 gün"],[30,"30 gün"]])}<span class="yardim">Süreyi işletmenin hukuk danışmanı doğrular.</span></div>
+  </section>
+  <section class="ayar-grup">
+    <h2>Kanallar</h2>
+    ${KANAL_SIRA.map(k => `<div class="anahtar-satir"><span>${KANAL[k]}<small>${k === "trendyol" ? "API: siparişler, iadeler ve sorular tek bağlantıyla" : k === "hepsiburada" ? "API bağlantısı" : k === "site" ? "Sipariş dosyası (CSV) yükleme" : "İşletme numarası mesajları"}</small></span>
+      <button class="anahtar" role="switch" id="ay-kanal-${k}" data-ayar="kanal" data-v="${k}" aria-checked="${D.kanallar[k]}" aria-label="${KANAL[k]}"></button></div>`).join("")}
+  </section>
+  <section class="ayar-grup">
+    <h2>Ekip</h2>
+    ${D.ekip.map((e, i) => `<div class="ekip-satir"><b>${esc(e.ad)}</b><span class="rol">${esc(e.rol)}</span><button class="sil" data-eylem="ekip-sil" data-i="${i}" aria-label="${esc(e.ad)} kişisini çıkar">Çıkar</button></div>`).join("")}
+    <form class="ekip-ekle" id="ekip-form">
+      <input type="text" id="ekip-ad" placeholder="Ad" aria-label="Ad" maxlength="20" autocomplete="off">
+      <select id="ekip-rol" aria-label="Rol"><option>Depo</option><option>Müşteri hizmetleri</option><option>Muhasebe</option></select>
+      <button class="btn" type="submit">Ekle</button>
+    </form>
+  </section>
+  <div class="kurulum" data-kurulum><b>1 gün</b><span>Bu ayarlarla kurulum: 1 gün. Trendyol anahtarı ve site dosyası yeterli.</span></div>`;
+}
+
+/* ================= alt sayfa ================= */
+const ekran = $("#ekran");
+let perde = null;
+function sheetAc(html){
+  sheetKapat(true);
+  perde = document.createElement("div");
+  perde.className = "perde"; perde.dataset.eylem = "perde";
+  perde.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><span class="sheet-tutamak"></span>${html}</div>`;
+  ekran.appendChild(perde); sheetAcik = true;
+  requestAnimationFrame(() => perde && perde.classList.add("acik"));
+  const ilk = perde.querySelector(".kapat"); if(ilk) ilk.focus({preventScroll:true});
+  tik();
+}
+function sheetKapat(hemen){
+  if(!perde) return;
+  const p = perde; perde = null; sheetAcik = false;
+  if(hemen){ p.remove(); return; }
+  p.classList.remove("acik"); setTimeout(() => p.remove(), 230);
+}
+const sheetBas = baslik => `<div class="sheet-bas"><h3>${baslik}</h3><button class="kapat" data-eylem="kapat" aria-label="Kapat">×</button></div>`;
+
+function soruAc(id){
+  const q = D.sorular.find(x => x.id === id); if(!q) return;
+  const c = q.durum === "cevaplandi", d = soruDurum(q);
+  const metin = c ? (q.gonderilen || sablon(q.x, q)) : sablon(q.x, q);
+  sheetAc(`${sheetBas("Soru")}
+    <div class="kalem s-${d}" style="border:0;padding:0">
+      <div class="kalem-ust">${kanal(q.k)}<span class="no">${esc(q.m)} · ${esc(q.u)}</span></div>
+      <p class="metin" style="font-size:16px">${esc(q.t)}</p>
+      ${c ? rozet("yesil","Cevaplandı") : `<div class="bekleme"><b class="canli" data-bas="${q.bas}" data-sn="1">${sure(simdi()-q.bas, true)}</b> bekliyor · ${rozet(d, DURUM_ET.soru[d])}</div>`}
+    </div>
+    <div class="taslak">
+      <div class="taslak-ust"><b>${c ? "Gönderilen cevap" : "Yapay zekâ taslağı"}</b><span>Bilgi bankası: ${esc(q.konu)} · Hitap: ${D.hitap === "siz" ? "Siz" : "Sen"}</span></div>
+      <textarea id="taslak-metin" rows="6" readonly aria-label="Cevap metni">${esc(metin)}</textarea>
+    </div>
+    ${c ? "" : `<p class="onay-notu" data-onay>${IK.kilit}<span>Bu bir taslaktır. <b>Onaylamadan müşteriye gitmez.</b> Okuyun, gerekirse düzenleyin.</span></p>
+    <div class="sheet-eylem"><button class="btn buyuk" data-eylem="duzenle">Düzenle</button><button class="btn birincil buyuk" data-eylem="gonder" data-id="${q.id}">Onayla ve gönder</button></div>`}`);
+}
+function gecikmeAc(no){
+  const s = D.siparisler.find(x => x.no === no); if(!s) return;
+  const kanalAd = s.k === "site" ? "SMS" : s.k === "whatsapp" ? "WhatsApp" : KANAL[s.k] + " mesajı";
+  const m = sablon(`Merhaba {ad}, #${s.no} numaralı [siparişiniz|siparişin] beklenenden geç hazırlandı, özür dileriz. Bugün {kesim} kadar kargoya verilecek; takip numarası gelince hemen [ileteceğiz|ileteceğiz]. Anlayışınız için teşekkürler. {marka}`.replace("Anlayışınız", D.hitap === "siz" ? "Anlayışınız" : "Anlayışın"), s);
+  sheetAc(`${sheetBas("Gecikme mesajı")}
+    <p class="kalem-alt" style="margin:0">#${s.no} · ${esc(s.m)} · Gidecek yer: ${kanalAd}</p>
+    <div class="taslak"><div class="taslak-ust"><b>Hazır şablon</b><span>Gecikme bildirimi · ${D.hitap === "siz" ? "Siz" : "Sen"}</span></div>
+      <textarea id="taslak-metin" rows="6" readonly aria-label="Mesaj metni">${esc(m)}</textarea></div>
+    <p class="onay-notu">${IK.kilit}<span>Mesaj ancak siz onaylayınca gider.</span></p>
+    <div class="sheet-eylem"><button class="btn buyuk" data-eylem="duzenle">Düzenle</button><button class="btn birincil buyuk" data-eylem="gecikme-gonder" data-id="${s.no}">Onayla ve gönder</button></div>`);
+}
+function ataAc(no){
+  const s = D.siparisler.find(x => x.no === no); if(!s) return;
+  sheetAc(`${sheetBas("Sorumlu ata")}
+    <p class="kalem-alt" style="margin:0">#${s.no} · ${esc(s.u)}</p>
+    <div class="kisi-sec">${D.ekip.map(e => `<button data-eylem="ata" data-id="${s.no}" data-kisi="${esc(e.ad)}">${esc(e.ad)}<span>${esc(e.rol)}${s.sorumlu === e.ad ? " · şu an" : ""}</span></button>`).join("")}</div>
+    <p class="kalem-alt" style="margin:0">Ekip listesi Ayarlar'dan değişir.</p>`);
+}
+function baglantiAc(no){
+  const r = D.iadeler.find(x => x.no === no); if(!r) return;
+  const a = iadeAdim(r);
+  const son = r.bas + D.iadeSinir*GUN;
+  const adimlar = D.adimlar.map((ad, i) => `<li class="${i <= a ? "tamam" : "bekliyor"}"><span class="top">${i <= a ? IK.tik : ""}</span>${ad}<small>${i <= a ? tarih(r.bas + r.ag[i]*GUN) : ""}</small></li>`).join("");
+  const durumMetin = iadeBitti(r) ? "paranız iade edildi" : `iadeniz şu an "${D.adimlar[a+1]}" adımında`;
+  sheetAc(`${sheetBas("Müşterinin göreceği sayfa")}
+    <div class="tarayici">
+      <div class="adres">vakit.örnek/i/${r.no}</div>
+      <div class="musteri-sayfa">
+        <div style="display:flex;gap:8px;align-items:center"><span class="logo ${D.sekil}" style="width:28px;height:28px;font-size:14px">${esc((D.ad[0]||"?").toLocaleUpperCase("tr"))}</span><b>${esc(D.ad)}</b></div>
+        <h4>İade durumu</h4>
+        <p>${esc(sablon(`Merhaba {ad}, ` + (D.hitap === "siz" ? durumMetin : durumMetin.replace("paranız","paran").replace("iadeniz","iaden")) + ".", r))}</p>
+        <ol class="dikey">${adimlar}</ol>
+        ${iadeBitti(r) ? "" : `<p class="son-tarih">${D.hitap === "siz" ? "Paranız" : "Paran"} en geç <b>${tarih(son)}</b> tarihinde ödeme yöntemine iade edilir.</p>`}
+        <p class="kalem-alt">Sorunuz olursa bu sayfadan yazabilirsiniz.</p>
+      </div>
+    </div>
+    <div class="sheet-eylem"><button class="btn buyuk" data-eylem="kapat">Kapat</button><button class="btn birincil buyuk" data-eylem="kopyala" data-id="${r.no}">Bağlantıyı kopyala</button></div>`);
+}
+
+/* ================= bildirim ================= */
+let bildirimZ = 0;
+function bildir(m){
+  const b = $("#bildirim"); b.textContent = m; b.classList.add("goster");
+  clearTimeout(bildirimZ); bildirimZ = setTimeout(() => b.classList.remove("goster"), 2200);
+}
+
+/* ================= olaylar ================= */
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-sekme],[data-git],[data-soru],[data-eylem],[data-ayar],[data-marka]");
+  if(!t) return;
+  if(t.dataset.eylem === "perde" && e.target !== t) return;
+  if(t.dataset.sekme){ sheetKapat(true); sekmeyeGit(t.dataset.sekme); return; }
+  if(t.dataset.git){ sekmeyeGit(t.dataset.git); return; }
+  if(t.dataset.marka){ markaDegis(t.dataset.marka); return; }
+  if(t.dataset.soru && !t.dataset.eylem){ soruAc(t.dataset.soru); return; }
+  if(t.dataset.ayar){ if(t.tagName !== "SELECT") ayarla(t.dataset.ayar, t.dataset.v); return; }
+  const id = t.dataset.id;
+  switch(t.dataset.eylem){
+    case "perde": case "kapat": sheetKapat(); break;
+    case "duzenle": { const ta = $("#taslak-metin"); ta.readOnly = false; ta.classList.add("duzenleniyor"); ta.focus(); t.textContent = "Düzenleniyor"; t.disabled = true; break; }
+    case "gonder": { const q = D.sorular.find(x => x.id === id); q.gonderilen = $("#taslak-metin").value; q.durum = "cevaplandi"; sheetKapat(); ciz(); bildir("Gönderildi (demo)"); break; }
+    case "gecikme": gecikmeAc(id); break;
+    case "gecikme-gonder": { D.siparisler.find(x => x.no === id).mesaj = true; sheetKapat(); ciz(); bildir("Gönderildi (demo)"); break; }
+    case "ata-ac": ataAc(id); break;
+    case "ata": { D.siparisler.find(x => x.no === id).sorumlu = t.dataset.kisi; sheetKapat(); ciz(); bildir(`${t.dataset.kisi} sorumlu`); break; }
+    case "ilerlet": { const r = D.iadeler.find(x => x.no === id); if(!iadeBitti(r)){ r.ag.push(iadeGun(r)); } ciz(); bildir(iadeBitti(r) ? "Para iadesi işlendi" : `Adım: ${D.adimlar[iadeAdim(r)]}`); break; }
+    case "baglanti": baglantiAc(id); break;
+    case "kopyala": {
+      const url = `vakit.örnek/i/${id}`;
+      try{ navigator.clipboard.writeText(url).then(() => bildir("Bağlantı kopyalandı"), () => bildir("Kopyalanamadı; adresi seçip kopyalayın")); }catch(err){ bildir("Kopyalanamadı; adresi seçip kopyalayın"); }
+      break;
+    }
+    case "ekip-sil": { if(D.ekip.length > 1){ D.ekip.splice(+t.dataset.i, 1); ciz(); } else bildir("En az bir kişi kalmalı"); break; }
+  }
+});
+document.addEventListener("keydown", e => {
+  if((e.key === "Enter" || e.key === " ") && e.target.dataset && e.target.dataset.soru){ e.preventDefault(); soruAc(e.target.dataset.soru); }
+  if(e.key === "Escape" && sheetAcik) sheetKapat();
+});
+document.addEventListener("input", e => {
+  if(e.target.id === "ay-ad"){ D.ad = e.target.value; temaUygula(); }
+});
+document.addEventListener("change", e => {
+  if(e.target.id === "ay-kargo"){ ayarla("kargo", e.target.value); }
+});
+document.addEventListener("submit", e => {
+  if(e.target.id !== "ekip-form") return;
+  e.preventDefault();
+  const ad = $("#ekip-ad").value.trim(); if(!ad){ $("#ekip-ad").focus(); return; }
+  D.ekip.push({ad, rol: $("#ekip-rol").value}); ciz(); bildir(`${ad} eklendi`);
+});
+function ayarla(ad, v){
+  if(ad === "marka"){ markaDegis(v); return; }
+  if(ad === "renk") D.renk = v;
+  if(ad === "hitap") D.hitap = v;
+  if(ad === "hedef") D.soruHedefDk = +v;
+  if(ad === "kargo") D.kargoSaat = +v;
+  if(ad === "sinir") D.iadeSinir = +v;
+  if(ad === "kanal") D.kanallar[v] = !D.kanallar[v];
+  temaUygula(); ciz();
+}
+function markaDegis(id){
+  if(!MARKALAR[id]) return;
+  sheetKapat(true); markaYukle(id); ciz();
+}
+
+/* ================= canlı sayaç ================= */
+let sonImza = "";
+function imza(){ return D ? [acikSorular().map(soruDurum).join(""), sheetAcik].join("|") : ""; }
+function tik(){
+  const n = simdi();
+  document.querySelectorAll(".canli").forEach(el => {
+    if(el.dataset.bas) el.innerHTML = sure(n - +el.dataset.bas, el.dataset.sn === "1");
+    else if(el.dataset.hedef) el.innerHTML = sure(+el.dataset.hedef - n);
+  });
+  const ck = document.querySelector(".canli-kesim"); if(ck){ const k = kesimMs() - n; ck.textContent = k > 0 ? sure(k) : "süre doldu"; }
+  const d = new Date(n); $("#saat").textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+setInterval(() => {
+  tik();
+  const i = imza();
+  if(i !== sonImza){ const eski = sonImza; sonImza = i; if(eski && !sheetAcik && !TUR.aktif) ciz(); }
+}, 1000);
+
+/* ================= demo şeridi ================= */
+$("#demo-markalar").innerHTML = Object.values(MARKALAR).map(m =>
+  `<button class="marka-btn" data-marka="${m.id}" aria-pressed="false"><span class="nokta" style="background:${RENKLER[m.renk].a}"></span><span>${m.ad}<small>${m.sektor} · ${m.ekip.length} kişi · ${KANAL_SIRA.filter(k => m.kanallar[k]).map(k => KANAL[k]).join(", ")}</small></span></button>`).join("");
+
+/* ================= sunum turu ================= */
+const TUR = {aktif:false, no:0};
+const imlec = $("#imlec"), altyazi = $("#altyazi");
+const azHareket = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function bekle(ms){ const n = TUR.no; return new Promise((ok, red) => setTimeout(() => n === TUR.no ? ok() : red("iptal"), ms)); }
+function yaz(m){
+  const s = altyazi.firstElementChild; altyazi.hidden = false;
+  s.classList.add("sil");
+  setTimeout(() => { s.textContent = m; s.classList.remove("sil"); }, azHareket ? 0 : 160);
+}
+function olcekle(){
+  if(!document.documentElement.classList.contains("tur")) return;
+  const w = innerWidth, h = innerHeight;
+  const o = Math.min((h - 14 - 150) / 868, (w - 20) / 414);
+  document.documentElement.style.setProperty("--olcek", Math.max(.3, o).toFixed(3));
+}
+addEventListener("resize", olcekle);
+let imlecXY = null;
+function imlecKoy(x, y){ imlec.hidden = false; imlec.style.transform = `translate(${x}px,${y}px)`; imlecXY = [x, y]; }
+function gorunur(el){
+  if(!el) return;
+  const kap = el.closest(".sheet") || icerik;
+  const r = el.getBoundingClientRect(), k = kap.getBoundingClientRect();
+  const o = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--olcek")) || 1;
+  if(r.top < k.top + 20 || r.bottom > k.bottom - 20){
+    const hedef = kap.scrollTop + (r.top - k.top) / o - (k.height / o) * 0.22;
+    kap.style.scrollBehavior = "auto"; kap.scrollTop = Math.max(0, hedef); kap.style.scrollBehavior = "";
+  }
+}
+async function git(el){
+  if(!el) return;
+  gorunur(el);
+  await bekle(60);
+  const r = el.getBoundingClientRect();
+  const x = r.left + Math.min(r.width/2, 120 + r.width*0.15), y = r.top + Math.min(r.height/2, 40);
+  if(!imlecXY) { imlecKoy(innerWidth/2, innerHeight*0.62); await bekle(30); }
+  imlecKoy(x, y);
+  await bekle(azHareket ? 200 : 700);
+}
+async function tikla(sel){
+  const el = typeof sel === "string" ? $(sel) : sel;
+  if(!el) { console.warn("tur: hedef yok", sel); return; }
+  await git(el);
+  imlec.classList.remove("dokun"); void imlec.offsetWidth; imlec.classList.add("dokun");
+  await bekle(220);
+  el.click();
+  await bekle(320);
+}
+function vurgula(sel){
+  const el = typeof sel === "string" ? $(sel) : sel; if(!el) return;
+  gorunur(el);
+  el.classList.remove("vurgu"); void el.offsetWidth; el.classList.add("vurgu");
+  setTimeout(() => el.classList.remove("vurgu"), 3000);
+}
+async function markaGecis(id){
+  ekran.classList.add("gecis"); await bekle(azHareket ? 50 : 260);
+  markaDegis(id); sekmeyeGit("bugun");
+  ekran.classList.remove("gecis"); await bekle(300);
+}
+const saatMetni = q => { const dk = Math.floor((simdi() - q.bas)/DK); return dk >= 60 ? `${Math.floor(dk/60)} saattir` : `${dk} dakikadır`; };
+
+async function turSorular(){
+  markaDegis("lal"); sekmeyeGit("bugun");
+  yaz("Sabah ilk iş: geciken ne var?"); await bekle(3000);
+  await tikla('[data-sekme="sorular"]');
+  yaz("Tüm kanalların soruları tek listede."); await bekle(2800);
+  const ilk = $(".soru"); const q = D.sorular.find(x => x.id === ilk.dataset.soru);
+  vurgula(ilk); yaz(`Müşteri ${saatMetni(q)} cevap bekliyor.`); await bekle(3200);
+  await tikla(ilk);
+  yaz("Yapay zekâ cevap taslağını hazırladı."); vurgula("#taslak-metin"); await bekle(3200);
+  vurgula("[data-onay]"); yaz("Siz onaylamadan hiçbir cevap gitmez."); await bekle(3000);
+  await tikla('[data-eylem="gonder"]');
+  yaz("Gönderildi. Bekleyen soru bir azaldı."); await bekle(2800);
+  await tikla('[data-sekme="bugun"]');
+  vurgula('[data-kart="sorular"]'); yaz("Kırmızı işler tek tek kapanıyor."); await bekle(3000);
+}
+async function turSiparisler(){
+  markaDegis("lal"); sekmeyeGit("bugun");
+  yaz("Kargo gecikmesi, en sık şikâyet."); await bekle(2800);
+  await tikla('[data-sekme="siparisler"]');
+  const ilk = $(".siparis");
+  vurgula(ilk.querySelector(".bekleme")); yaz("Bu sipariş 3 gündür kargoya verilmedi."); await bekle(3200);
+  vurgula(ilk.querySelector("[data-gs]")); yaz("Son teslim saatine geri sayım."); await bekle(3000);
+  await tikla(ilk.querySelector('[data-eylem="ata-ac"]'));
+  yaz("İşi depodan birine verelim."); await bekle(1500);
+  await tikla('[data-kisi="Mehmet"]');
+  yaz("Artık sorumlusu belli: Mehmet."); await bekle(2600);
+  await tikla($(".siparis").querySelector('[data-eylem="gecikme"]'));
+  yaz("Müşteriye hazır gecikme mesajı."); await bekle(2800);
+  await tikla('[data-eylem="gecikme-gonder"]');
+  yaz("Onayla, gitsin. Müşteri merak etmesin."); await bekle(2600);
+  const eksik = [...document.querySelectorAll(".siparis")].find(x => x.querySelector(".uyari"));
+  if(eksik){ vurgula(eksik); yaz("Takip numarası eksik olan da görünür."); await bekle(3000); }
+}
+async function turIadeler(){
+  markaDegis("lal"); sekmeyeGit("bugun");
+  yaz("İade parası nerede kaldı?"); await bekle(2600);
+  await tikla('[data-sekme="iadeler"]');
+  yaz("Her iadenin adımı ve sorumlusu görünür."); await bekle(3000);
+  const k = $('[data-iade="R-2041"]');
+  vurgula(k.querySelector("[data-sinir]")); yaz(`Ödeme sınırı ${D.iadeSinir} gün. Bu iade ${iadeGun(D.iadeler.find(r => r.no === "R-2041"))}. günde.`); await bekle(3400);
+  await tikla($('[data-iade="R-2041"] [data-eylem="ilerlet"]'));
+  yaz("Kontrol bitti, iade onaylandı."); await bekle(2600);
+  await tikla($('[data-iade="R-2041"] [data-eylem="ilerlet"]'));
+  vurgula($('[data-iade="R-2041"]')); yaz("Para iadesi yapıldı, süre içinde."); await bekle(3000);
+  await tikla($('[data-iade="R-2041"] [data-eylem="baglanti"]'));
+  yaz("Müşteri durumu kendisi görür, sormaz."); await bekle(3800);
+  await tikla('[data-eylem="kapat"]');
+  await bekle(300);
+}
+async function turKisisellestir(){
+  markaDegis("lal"); sekmeyeGit("bugun");
+  yaz("Lâl Kozmetik için kurulmuş panel."); await bekle(2300);
+  await markaGecis("pitircik");
+  yaz("Aynı panel, Pıtırcık Oyuncak için."); await bekle(2300);
+  await tikla('[data-sekme="sorular"]');
+  await tikla($(".soru"));
+  vurgula("#taslak-metin"); yaz("Burada hitap 'sen': taslak samimi."); await bekle(2800);
+  await tikla('[data-eylem="kapat"]');
+  await markaGecis("keten");
+  await tikla('[data-sekme="iadeler"]');
+  vurgula($(".foto") || $(".iade")); yaz("Keten Ev: iadede kalite kontrol fotoğrafı."); await bekle(2700);
+  await tikla('[data-sekme="ayarlar"]');
+  yaz("Renk, hitap, süreler: tek dokunuş."); await bekle(1400);
+  await tikla("#ay-renk-lacivert"); await bekle(200);
+  await tikla("#ay-hitap-sen"); await bekle(100);
+  await tikla("#ay-hedef-120");
+  yaz("Değişiklik hemen uygulanır."); await bekle(1600);
+  await tikla("#ay-kanal-whatsapp");
+  yaz("Kapatılan kanal listelerden çıkar."); await bekle(2100);
+  vurgula("[data-kurulum]"); yaz("Bu ayarlarla kurulum: 1 gün."); await bekle(3000);
+}
+async function kapanis(){
+  altyazi.hidden = true; imlec.hidden = true;
+  const k = $("#kapanis"); k.hidden = false; requestAnimationFrame(() => k.classList.add("goster"));
+  await bekle(4200);
+}
+const TURLAR = {"tur-sorular":[turSorular], "tur-siparisler":[turSiparisler], "tur-iadeler":[turIadeler], "tur-kisisellestir":[turKisisellestir],
+  "tur-hepsi":[turSorular, turSiparisler, turIadeler, turKisisellestir]};
+
+async function turBaslat(ad){
+  const adimlar = TURLAR[ad]; if(!adimlar) return;
+  TUR.no++; TUR.aktif = true; window.__turBitti = false;
+  const no = TUR.no;
+  document.documentElement.classList.add("tur"); olcekle();
+  $("#kapanis").hidden = true; $("#kapanis").classList.remove("goster");
+  imlecXY = null;
+  const t0 = performance.now();
+  try{
+    await bekle(400);
+    for(const f of adimlar){ sheetKapat(true); await f(); }
+    await kapanis();
+    if(no === TUR.no){ window.__turSure = Math.round((performance.now() - t0)/100)/10; window.__turBitti = true; }
+  }catch(e){ if(e !== "iptal") { console.error(e); window.__turBitti = true; } }
+}
+function turBitir(){
+  TUR.no++; TUR.aktif = false;
+  document.documentElement.classList.remove("tur");
+  altyazi.hidden = true; imlec.hidden = true; $("#kapanis").hidden = true;
+}
+
+/* ================= başlangıç ve hash ================= */
+function hashOku(ilk){
+  const h = location.hash.replace("#","");
+  if(TURLAR[h]){ turBaslat(h); return; }
+  if(TUR.aktif) turBitir();
+  if(h.startsWith("marka-")){ const id = h.slice(6); if(MARKALAR[id]) { markaDegis(id); return; } }
+  if(ilk){ let id = "lal"; try{ const s = localStorage.getItem("vakit-marka"); if(s && MARKALAR[s]) id = s; }catch(e){} markaYukle(id); ciz(); }
+}
+addEventListener("hashchange", () => hashOku(false));
+markaYukle("lal");
+hashOku(true);
+if(!D) markaYukle("lal");
+ciz();
+sonImza = imza();
+})();
+</script>
+
+</body>
+</html>
