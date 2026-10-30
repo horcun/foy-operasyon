@@ -1,5 +1,7 @@
 # Föy Operasyon — Ajanda
 
+> **DONDURULDU (2026-10-30, Orçun).** Usu değerlendirmesi: çok kanallı panel 42/100 reddet; "İade ve Ceza Kalkanı" (Trendyol, 48 saat otomatik kabul) 44/100 ek araştırma — rapor horcun/Usu PR #14. Açılırsa önce gerçek bir Trendyol satıcısıyla görüşme (Usu'nun 10 sorusu), sonra iade sayacının Trendyol kuralına (depoya ulaşınca 48 saat) bağlanması.
+
 > Sıradaki işler. En yeni karar üstte. Kaynak sütunu kararın nereden geldiğini gösterir.
 
 ## Yapılacaklar
